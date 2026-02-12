@@ -19,7 +19,7 @@ let cortexSpikeUntil=0;
 const elTitle=qs("#lessonTitle"), elBubble=qs("#bubbleText"), elStepPill=qs("#stepPill"), elStepTitle=qs("#stepTitle");
 const elBlocks=qs("#blocksSvg"), elBlocksFallback=qs("#blocksFallback"), elBlocksStatus=qs("#blocksStatus"), elProgress=qs("#progressBar");
 const btnBack=qs("#backBtn"), btnNext=qs("#nextBtn"), btnDone=qs("#doneBtn"), btnHint=qs("#hintBtn"), btnRestart=qs("#restartBtn");
-const hintBox=qs("#hintBox"), elHintText=qs("#hintText"), btnCloseHint=qs("#closeHintBtn");
+const hintBox=qs("#hintBox"), elHintText=qs("#hintText");
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -104,7 +104,20 @@ const PAL={ red:"#ff3b30", amber:"#ffb020", blue:"#1e86ff" };
 const particles=[];
 let lastEmit=0;
 
-const CUBE_CENTERS = { left: 0.33, mid: 0.50, right: 0.67 };
+// Adjusted positions: shift left by different amounts for each cube
+// Converting cm to approximate pixel offset (assuming ~37.8 pixels per cm at standard DPI)
+const CM_TO_PX = 37.8;
+const CUBE_CENTERS = { 
+  left: 0.33,   // Red cube - shift left 1.1cm
+  mid: 0.50,    // Amber cube - shift left 0.8cm
+  right: 0.67   // Blue cube - shift left 0.3cm
+};
+const CUBE_OFFSETS = {
+  left: -1.1 * CM_TO_PX,    // -41.58px
+  mid: -0.8 * CM_TO_PX,     // -30.24px
+  right: -0.3 * CM_TO_PX    // -11.34px
+};
+
 const EMIT_Y_RATIO = 0.30; // slightly lower (closer to cube top)
 const EMIT_IDLE_MS = 200;
 const EMIT_ACTIVE_MS = 40;
@@ -129,9 +142,10 @@ function emit(){
 
   const originY = top + h * EMIT_Y_RATIO;
 
-  const leftX  = left + w * CUBE_CENTERS.left;
-  const midX   = left + w * CUBE_CENTERS.mid;
-  const rightX = left + w * CUBE_CENTERS.right;
+  // Calculate center positions with left shift offsets
+  const leftX  = left + w * CUBE_CENTERS.left + CUBE_OFFSETS.left;
+  const midX   = left + w * CUBE_CENTERS.mid + CUBE_OFFSETS.mid;
+  const rightX = left + w * CUBE_CENTERS.right + CUBE_OFFSETS.right;
 
   // Idle: slow floating dots from each cube center
   if(!active){
@@ -337,7 +351,6 @@ btnDone.addEventListener("click", ()=>{
   spike();
 });
 btnHint.addEventListener("click", showHint);
-btnCloseHint.addEventListener("click", hideHint);
 
 btnRestart.addEventListener("click", async ()=>{
   clearProgress(lesson.lessonId);

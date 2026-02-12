@@ -37,10 +37,10 @@ Interactive lesson player for Cognitive Systems Academy™ AI Coding courses.
 ## ✨ Features
 
 - ✅ Scratchblocks rendering with proper CSS
-- ✅ Cortex animation (floating dots from cube centers)
+- ✅ Cortex animation (floating dots from cube centers, aligned to actual cube positions)
 - ✅ Progress tracking (saved to localStorage)
 - ✅ Step-by-step instructions with typing animation
-- ✅ Hint system
+- ✅ Hint system (auto-dismisses on navigation)
 - ✅ Navigation controls (Back/Next/Done/Restart)
 - ✅ Responsive design
 
@@ -48,7 +48,10 @@ Interactive lesson player for Cognitive Systems Academy™ AI Coding courses.
 
 - **Idle**: Slow floating dots from each cube (red/amber/blue)
 - **Thinking**: Fast burst of dots when typing instructions
-- Colors aligned with respective cube centers
+- Dots emit from precise cube center positions:
+  - Red cube: shifted left 1.1cm
+  - Amber cube: shifted left 0.8cm
+  - Blue cube: shifted left 0.3cm
 
 ## 🔧 Adding More Lessons
 
@@ -79,6 +82,7 @@ Name format: `Y{year}_T{term}_W{week}.json` (e.g., `Y1_T2_W05.json`)
 - Requires internet connection for scratchblocks CDN
 - Progress is saved per lesson in browser localStorage
 - Compatible with all modern browsers
+- Hint box auto-dismisses when navigating between steps
 
 ## 🐛 Troubleshooting
 
@@ -91,6 +95,10 @@ Name format: `Y{year}_T{term}_W{week}.json` (e.g., `Y1_T2_W05.json`)
 - Ensure JSON filename matches exactly (case-sensitive)
 - Check JSON is valid (use jsonlint.com)
 - Hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
+
+**Cortex dots not aligned?**
+- Positions are calculated based on cube centers
+- Offsets: Red -1.1cm, Amber -0.8cm, Blue -0.3cm from default positions
 
 ---
 
