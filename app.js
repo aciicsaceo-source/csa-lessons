@@ -20,6 +20,7 @@ const elTitle=qs("#lessonTitle"), elBubble=qs("#bubbleText"), elStepPill=qs("#st
 const elBlocks=qs("#blocksSvg"), elBlocksFallback=qs("#blocksFallback"), elBlocksStatus=qs("#blocksStatus"), elProgress=qs("#progressBar");
 const btnBack=qs("#backBtn"), btnNext=qs("#nextBtn"), btnDone=qs("#doneBtn"), btnHint=qs("#hintBtn"), btnRestart=qs("#restartBtn");
 const hintBox=qs("#hintBox"), elHintText=qs("#hintText");
+const bubbleEl=qs("#bubble");
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -86,7 +87,7 @@ async function loadScratchblocks(){
   return scratchblocksReady;
 }
 
-// === Cortex (dots floating from cube centers) ===
+// === Cortex (dots floating from cube centers, stop at bubble) ===
 const logoImg=qs("#csaLogo");
 const leftPanel=qs("#leftPanel");
 const canvas=qs("#cortexCanvas");
@@ -105,7 +106,6 @@ const particles=[];
 let lastEmit=0;
 
 // Adjusted positions: shift left by different amounts for each cube
-// Converting cm to approximate pixel offset (assuming ~37.8 pixels per cm at standard DPI)
 const CM_TO_PX = 37.8;
 const CUBE_CENTERS = { 
   left: 0.33,   // Red cube - shift left 1.1cm
@@ -118,12 +118,18 @@ const CUBE_OFFSETS = {
   right: -0.3 * CM_TO_PX    // -11.34px
 };
 
-const EMIT_Y_RATIO = 0.30; // slightly lower (closer to cube top)
+const EMIT_Y_RATIO = 0.30;
 const EMIT_IDLE_MS = 200;
 const EMIT_ACTIVE_MS = 40;
 
-function spawnDot(x,y,color,speed,alpha,size){
-  particles.push({x,y,vy:speed,vx:0,alpha,size, color, life:0, maxLife:300+Math.random()*200});
+function spawnDot(x,y,color,speed,alpha,size,vx){
+  particles.push({x,y,vy:speed,vx:vx||0,alpha,size, color, life:0, maxLife:300+Math.random()*200});
+}
+
+function getBubbleBottomY(){
+  const panel = leftPanel.getBoundingClientRect();
+  const bubble = bubbleEl.getBoundingClientRect();
+  return bubble.bottom - panel.top;
 }
 
 function emit(){
@@ -151,38 +157,41 @@ function emit(){
   if(!active){
     // Red cube - slow red dots
     spawnDot(leftX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.red,
-      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2);
+      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
     
     // Amber cube - slow amber dots  
     spawnDot(midX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.amber,
-      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2);
+      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
     
     // Blue cube - slow blue dots
     spawnDot(rightX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.blue,
-      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2);
+      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
   }
 
-  // Active (thinking): burst of faster, brighter dots
+  // Active (thinking): burst of faster, brighter dots - RED and BLUE drift toward YELLOW
   if(active){
-    const burstCount = 25;
+    const burstCount = 15; // Reduced from 25 for less intensity
     for(let i=0;i<burstCount;i++){
       const r = Math.random();
-      let x, color;
+      let x, color, vx;
       
       // More amber (yellow) dots when thinking, some red/blue
       if(r < 0.60){ 
         x = midX + (Math.random()-0.5)*20; 
-        color = PAL.amber; 
+        color = PAL.amber;
+        vx = 0; // Yellow stays centered
       } else if(r < 0.80){ 
         x = rightX + (Math.random()-0.5)*20; 
-        color = PAL.blue; 
+        color = PAL.blue;
+        vx = (midX - rightX) * 0.008; // Blue drifts LEFT toward yellow
       } else { 
         x = leftX + (Math.random()-0.5)*20; 
-        color = PAL.red; 
+        color = PAL.red;
+        vx = (midX - leftX) * 0.008; // Red drifts RIGHT toward yellow
       }
 
       spawnDot(x, originY + Math.random()*5, color,
-        1.5+Math.random()*2.5, 0.5+Math.random()*0.3, 3+Math.random()*4);
+        1.2+Math.random()*1.8, 0.4+Math.random()*0.25, 3+Math.random()*3, vx); // Reduced speed and alpha
     }
   }
 }
@@ -192,10 +201,13 @@ function cortexTick(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   emit();
 
+  const bubbleBottom = getBubbleBottomY();
+
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
     p.life++;
     p.y-=p.vy;
+    p.x+=p.vx;
 
     const fade=Math.max(0,1-p.life/p.maxLife);
     ctx.globalAlpha=p.alpha*fade;
@@ -206,10 +218,64 @@ function cortexTick(){
     ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     ctx.fill();
 
-    if(p.life>=p.maxLife || p.y<-240) particles.splice(i,1);
+    // Remove if: reached max life, went off top, OR reached bubble bottom
+    if(p.life>=p.maxLife || p.y<-240 || p.y <= bubbleBottom) {
+      particles.splice(i,1);
+    }
   }
   ctx.globalAlpha=1;
   requestAnimationFrame(cortexTick);
+}
+
+// === Progressive Unlocking System ===
+function getLevelProgress(lessonId){
+  try{
+    const raw = localStorage.getItem(`CSA_LEVEL__${lessonId}`);
+    if(!raw) return {unlockedLevel: 'basic', completedLevels: []};
+    return JSON.parse(raw);
+  }catch(_){
+    return {unlockedLevel: 'basic', completedLevels: []};
+  }
+}
+
+function saveLevelProgress(lessonId, unlockedLevel, completedLevels){
+  localStorage.setItem(`CSA_LEVEL__${lessonId}`, JSON.stringify({unlockedLevel, completedLevels}));
+}
+
+function unlockNextLevel(lessonId, currentLevel){
+  const levelProgress = getLevelProgress(lessonId);
+  
+  // Add current level to completed if not already there
+  if(!levelProgress.completedLevels.includes(currentLevel)){
+    levelProgress.completedLevels.push(currentLevel);
+  }
+  
+  // Unlock next level
+  if(currentLevel === 'basic' && levelProgress.unlockedLevel === 'basic'){
+    levelProgress.unlockedLevel = 'standard';
+  } else if(currentLevel === 'standard' && levelProgress.unlockedLevel === 'standard'){
+    levelProgress.unlockedLevel = 'advanced';
+  }
+  
+  saveLevelProgress(lessonId, levelProgress.unlockedLevel, levelProgress.completedLevels);
+  return levelProgress.unlockedLevel;
+}
+
+function getCurrentSteps(lesson){
+  const levelProgress = getLevelProgress(lesson.lessonId);
+  const currentLevel = levelProgress.unlockedLevel;
+  
+  // Return steps based on unlocked level
+  if(currentLevel === 'basic' && lesson.steps_basic){
+    return {steps: lesson.steps_basic, level: 'basic'};
+  } else if(currentLevel === 'standard' && lesson.steps_standard){
+    return {steps: lesson.steps_standard, level: 'standard'};
+  } else if(currentLevel === 'advanced' && lesson.steps_advanced){
+    return {steps: lesson.steps_advanced, level: 'advanced'};
+  }
+  
+  // Fallback to basic or generic steps
+  return {steps: lesson.steps_basic || lesson.steps || [], level: 'basic'};
 }
 
 // === Lesson loader & UI ===
@@ -225,11 +291,15 @@ function loadProgress(id){
   try{
     const raw=localStorage.getItem(key(id)); if(!raw) return;
     const p=JSON.parse(raw);
-    stepIndex=Math.max(0, Math.min(p.stepIndex||0, (lesson.steps?.length||1)-1));
+    const currentSteps = getCurrentSteps(lesson).steps;
+    stepIndex=Math.max(0, Math.min(p.stepIndex||0, (currentSteps?.length||1)-1));
     doneSteps=new Set(p.done||[]);
   }catch(_){}
 }
-function clearProgress(id){ localStorage.removeItem(key(id)); }
+function clearProgress(id){ 
+  localStorage.removeItem(key(id)); 
+  // Don't clear level progress on restart
+}
 
 async function typeBubble(text){
   typingAbort.abort=true; await sleep(10); typingAbort={abort:false};
@@ -266,7 +336,7 @@ async function renderBlocks(blocksText){
   console.log("[CSA] scratchblocks version:", window.scratchblocks);
 
   const pre=document.createElement("pre");
-  pre.className="blocks"; // Add class for scratchblocks
+  pre.className="blocks";
   pre.textContent=t;
   elBlocks.appendChild(pre);
 
@@ -274,7 +344,6 @@ async function renderBlocks(blocksText){
     console.log("[CSA] Calling scratchblocks.render...");
     scratchblocks.renderMatching("pre.blocks", {style:"scratch3"});
     
-    // Wait a moment for rendering to complete
     await sleep(100);
     
     const hasSvg = elBlocks.querySelector("svg");
@@ -298,14 +367,16 @@ async function renderBlocks(blocksText){
 }
 
 function setProgress(){
-  const total=lesson.steps.length;
+  const currentData = getCurrentSteps(lesson);
+  const total = currentData.steps.length;
   const pct=Math.round((doneSteps.size/total)*100);
   elProgress.style.width=`${pct}%`;
 }
 
 function hideHint(){ hintBox.classList.add("hidden"); }
 function showHint(){
-  const step=lesson.steps[stepIndex];
+  const currentData = getCurrentSteps(lesson);
+  const step = currentData.steps[stepIndex];
   elHintText.textContent=cleanText(step.hint || "Try again – check the blocks panel.");
   hintBox.classList.remove("hidden");
 }
@@ -313,10 +384,12 @@ function showHint(){
 function spike(){ cortexSpikeUntil=performance.now()+1600; }
 
 async function renderStep(){
-  const step=lesson.steps[stepIndex];
-  const total=lesson.steps.length;
+  const currentData = getCurrentSteps(lesson);
+  const step = currentData.steps[stepIndex];
+  const total = currentData.steps.length;
+  const levelLabel = currentData.level.charAt(0).toUpperCase() + currentData.level.slice(1);
 
-  elTitle.textContent=`${lesson.year} · ${lesson.term} · ${lesson.week} – ${lesson.title}`;
+  elTitle.textContent=`${lesson.year} · ${lesson.term} · ${lesson.week} – ${lesson.title} [${levelLabel}]`;
   elStepPill.textContent=`Step ${stepIndex+1} of ${total}`;
   elStepTitle.textContent=cleanText(step.title||"Step");
 
@@ -331,6 +404,25 @@ async function renderStep(){
 
   btnBack.disabled=(stepIndex===0);
   btnNext.disabled=(stepIndex===total-1);
+  
+  // Check if all steps are done - unlock next level
+  checkLevelCompletion();
+}
+
+function checkLevelCompletion(){
+  const currentData = getCurrentSteps(lesson);
+  const total = currentData.steps.length;
+  
+  if(doneSteps.size === total){
+    // All steps completed! Unlock next level
+    const newLevel = unlockNextLevel(lesson.lessonId, currentData.level);
+    
+    if(newLevel !== currentData.level){
+      // Show notification
+      const levelNames = {basic: 'Basic', standard: 'Standard', advanced: 'Advanced'};
+      alert(`🎉 Congratulations! You've completed ${levelNames[currentData.level]} level!\n\n${levelNames[newLevel]} level is now unlocked. Click Restart to try it!`);
+    }
+  }
 }
 
 btnBack.addEventListener("click", async ()=>{
@@ -339,7 +431,8 @@ btnBack.addEventListener("click", async ()=>{
   await renderStep(); save(lesson.lessonId);
 });
 btnNext.addEventListener("click", async ()=>{
-  if(stepIndex>=lesson.steps.length-1) return;
+  const currentData = getCurrentSteps(lesson);
+  if(stepIndex>=currentData.steps.length-1) return;
   stepIndex++;
   spike();
   await renderStep(); save(lesson.lessonId);
@@ -349,6 +442,7 @@ btnDone.addEventListener("click", ()=>{
   save(lesson.lessonId);
   setProgress();
   spike();
+  checkLevelCompletion();
 });
 btnHint.addEventListener("click", showHint);
 
@@ -363,7 +457,6 @@ btnRestart.addEventListener("click", async ()=>{
   resizeCanvas();
   requestAnimationFrame(cortexTick);
 
-  // preload scratchblocks early so it's ready when steps render
   await loadScratchblocks();
 
   const lessonId=getLessonId();
