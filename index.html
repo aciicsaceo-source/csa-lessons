@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CSA Lesson Player</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://scratchblocks.github.io/scratchblocks/scratchblocks.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-kicker">COGNITIVE SYSTEMS ACADEMY™</div>
+        <div id="lessonTitle" class="brand-title">Loading…</div>
+      </div>
+      <div class="top-actions">
+        <a class="btn" target="_blank" rel="noopener" href="https://scratch.mit.edu/projects/editor/">Open Scratch</a>
+        <button id="restartBtn" class="btn secondary" type="button">Restart</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="left" id="leftPanel">
+        <canvas id="cortexCanvas" class="cortex"></canvas>
+
+        <div class="bubble">
+          <div class="bubble-text" id="bubbleText">Loading…</div>
+        </div>
+
+        <div class="companion">
+          <div class="logo-wrap">
+            <img id="csaLogo" class="csa-logo" src="csa_logo_jelly.jpeg" alt="CSA logo" />
+          </div>
+        </div>
+      </section>
+
+      <section class="right">
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-header">
+            <div id="stepPill" class="pill">Step</div>
+            <h2 id="stepTitle" class="step-title">Loading…</h2>
+          </div>
+
+          <div class="step-body">
+            <div class="visual">
+              <div id="blocksSvg" class="blocks"></div>
+              <div id="blocksStatus" class="blocks-status hidden"></div>
+              <div id="blocksFallback" class="blocks-fallback hidden"></div>
+            </div>
+
+            <div id="hintBox" class="hintbox hidden" aria-live="polite">
+              <div class="hintbox-title">Hint</div>
+              <div id="hintText" class="hintbox-text"></div>
+              <button id="closeHintBtn" class="btn primary small" type="button">Got it</button>
+            </div>
+
+            <div class="controls">
+              <button id="backBtn" class="btn secondary" type="button">← Back</button>
+              <button id="hintBtn" class="btn secondary" type="button">Hint</button>
+
+              <div class="spacer"></div>
+
+              <button id="doneBtn" class="btn success" type="button">Done ✓</button>
+              <button id="nextBtn" class="btn primary" type="button">Next →</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          Wix gating: each week embeds <code>?lesson=Y1_T1_W01</code>, etc. Wix controls unlock.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

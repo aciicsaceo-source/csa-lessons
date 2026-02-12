@@ -1,0 +1,26 @@
+{
+  "year": "Year 1",
+  "term": "Term 1",
+  "week": "Week 2",
+  "title": "Guess My Number",
+  "steps": [
+    {
+      "title": "Pick a secret number",
+      "instruction": "Start by picking a secret number from 1 to 10.",
+      "hint": "Use Variables to make a variable named secret.",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))"
+    },
+    {
+      "title": "Ask for a guess",
+      "instruction": "Ask the player to guess a number from 1 to 10.",
+      "hint": "Sensing \u2192 ask and wait.",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess a number 1 to 10] and wait"
+    },
+    {
+      "title": "Check the answer",
+      "instruction": "If answer = secret: say \u201cCorrect!\u201d, else say \u201cTry again!\u201d",
+      "hint": "Use Control \u2192 if else, Operators \u2192 =",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess a number 1 to 10] and wait\nif <(answer) = (secret)> then\n  say [Correct!] for (2) seconds\nelse\n  say [Try again!] for (2) seconds"
+    }
+  ]
+}

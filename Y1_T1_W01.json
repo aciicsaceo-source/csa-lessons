@@ -1,0 +1,26 @@
+{
+  "year": "Year 1",
+  "term": "Term 1",
+  "week": "Week 1",
+  "title": "Talking Character",
+  "steps": [
+    {
+      "title": "Start a new Scratch project",
+      "instruction": "Open Scratch and click Create. You should see the Stage and a sprite (cat).",
+      "hint": "If you can\u2019t see the cat, refresh Scratch.",
+      "blocks_text": "when green flag clicked\nsay [Hello!] for (2) seconds"
+    },
+    {
+      "title": "Ask the player\u2019s name",
+      "instruction": "Use Sensing \u2192 ask and wait, then say hello using join and answer.",
+      "hint": "Operators \u2192 join, Sensing \u2192 answer.",
+      "blocks_text": "when green flag clicked\nask [What is your name?] and wait\nsay (join [Hello ] (answer)) for (2) seconds"
+    },
+    {
+      "title": "Add a friendly ending",
+      "instruction": "Add one more say block: \u201cNice to meet you!\u201d after the hello.",
+      "hint": "Put the new say block AFTER the join line.",
+      "blocks_text": "when green flag clicked\nask [What is your name?] and wait\nsay (join [Hello ] (answer)) for (2) seconds\nsay [Nice to meet you!] for (2) seconds"
+    }
+  ]
+}

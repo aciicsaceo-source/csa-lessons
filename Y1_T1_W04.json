@@ -1,0 +1,44 @@
+{
+  "year": "Year 1",
+  "term": "Term 1",
+  "week": "Week 4",
+  "title": "Reaction Timer",
+  "steps": [
+    {
+      "title": "Create two backdrops",
+      "instruction": "Click on the Stage (bottom right), then click Backdrops tab. Create two backdrops: one with big text 'WAIT' and another with 'GO'.",
+      "hint": "Use the text tool (T) in the backdrop editor to add large text. Make WAIT red and GO green.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Start with WAIT backdrop",
+      "instruction": "Click on the Stage, go to Code tab. Add 'when green flag clicked' and 'switch backdrop to WAIT'.",
+      "hint": "Make sure you're coding on the STAGE, not a sprite. Look for the stage icon in the bottom right.",
+      "blocks_text": "when green flag clicked\nswitch backdrop to [WAIT v]"
+    },
+    {
+      "title": "Add random wait time",
+      "instruction": "After switching to WAIT, add a 'wait' block with 'pick random 1 to 5' seconds inside it.",
+      "hint": "Control → wait ( ) seconds. Operators → pick random (1) to (5). Drag the pick random INTO the wait block.",
+      "blocks_text": "when green flag clicked\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds"
+    },
+    {
+      "title": "Reset timer and show GO",
+      "instruction": "Add 'reset timer' from Sensing, then 'switch backdrop to GO'.",
+      "hint": "Sensing → reset timer. Looks → switch backdrop to [GO].",
+      "blocks_text": "when green flag clicked\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds\nreset timer\nswitch backdrop to [GO v]"
+    },
+    {
+      "title": "Capture reaction time",
+      "instruction": "Add 'when stage clicked' event. Then add 'say (timer) for 2 seconds' to show your reaction time.",
+      "hint": "Sensing → timer block goes inside the say block.",
+      "blocks_text": "when stage clicked\nsay (timer) for (2) seconds"
+    },
+    {
+      "title": "Test your reaction timer",
+      "instruction": "Click green flag, wait for GO to appear, then click anywhere on the stage. Your reaction time should appear!",
+      "hint": "Don't click too early! Wait for the backdrop to change to GO first.",
+      "blocks_text": "when green flag clicked\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds\nreset timer\nswitch backdrop to [GO v]\n\nwhen stage clicked\nsay (timer) for (2) seconds"
+    }
+  ]
+}

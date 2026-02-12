@@ -1,0 +1,32 @@
+{
+  "year": "Year 1",
+  "term": "Term 1",
+  "week": "Week 3",
+  "title": "Smart Pet",
+  "steps": [
+    {
+      "title": "Choose your pet sprite",
+      "instruction": "Open Scratch and choose a Pet sprite from the sprite library (or keep the cat and rename it 'Pet').",
+      "hint": "Click the sprite icon in the bottom right to add a new sprite from the library.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Add click event",
+      "instruction": "Click on your Pet sprite to select it. Then drag 'when this sprite clicked' from Events into the coding area.",
+      "hint": "Look in the Events category (yellow blocks) for the 'when this sprite clicked' block.",
+      "blocks_text": "when this sprite clicked"
+    },
+    {
+      "title": "Make your pet talk",
+      "instruction": "Add a 'say' block so your pet says 'Hello! I am your pet!' for 2 seconds when clicked.",
+      "hint": "Find the 'say [ ] for ( ) seconds' block in the Looks category (purple).",
+      "blocks_text": "when this sprite clicked\nsay [Hello! I am your pet!] for (2) seconds"
+    },
+    {
+      "title": "Test your pet",
+      "instruction": "Click on your pet sprite on the stage. Does it say hello? If yes, mark this step as Done!",
+      "hint": "Click directly on the pet in the stage area (the big white area on the right).",
+      "blocks_text": "when this sprite clicked\nsay [Hello! I am your pet!] for (2) seconds"
+    }
+  ]
+}
