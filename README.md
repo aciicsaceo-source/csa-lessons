@@ -34,19 +34,28 @@ Interactive lesson player for Cognitive Systems Academy™ AI Coding courses wit
 ### Core Features
 - ✅ Scratchblocks rendering with proper CSS
 - ✅ Cortex animation with intelligent particle behavior
-- ✅ Progress tracking (saved to localStorage)
+- ✅ Progress bar tracking (auto-updates as you progress through steps)
 - ✅ Step-by-step instructions with typing animation
 - ✅ Hint system (auto-dismisses on navigation)
-- ✅ Navigation controls (Back/Next/Done/Restart)
+- ✅ Navigation controls (Back/Next/Complete Level/Restart)
 - ✅ Responsive design
 
-### 🎮 Progressive Unlocking System (NEW!)
+### 🎮 Progressive Unlocking System
+**How it works:**
+1. Navigate through steps using "Next →" button
+2. Progress bar fills automatically as you advance
+3. On the **final step only**, "Complete Level ✓" button appears
+4. Click "Complete Level ✓" to unlock next difficulty
+5. Prompt asks: "Are you ready for [Standard/Advanced] level?"
+   - **Yes** → Automatically transitions to next level
+   - **No** → Stay on current level, try next level later via Restart
+
+**Level Progression:**
 - **Basic Level**: Always available - learn fundamentals
 - **Standard Level**: Unlocks when Basic is completed
 - **Advanced Level**: Unlocks when Standard is completed
 - Progress saved per lesson
-- Alert notification when unlocking new levels
-- Level indicator in lesson title
+- Level indicator in lesson title: `[Basic]`, `[Standard]`, `[Advanced]`
 
 ### 🎨 Enhanced Cortex Animation
 **Idle Mode** (slow, calm):
@@ -66,15 +75,22 @@ Interactive lesson player for Cognitive Systems Academy™ AI Coding courses wit
 - Amber cube: shifted left 0.8cm (~30.2px)
 - Blue cube: shifted left 0.3cm (~11.3px)
 
-## 📖 How Progressive Unlocking Works
+## 🎯 Student Experience Flow
 
-1. **Start with Basic**: All lessons begin at Basic level
-2. **Complete all steps**: Mark each step as "Done" ✓
-3. **Unlock next level**: When all Basic steps are done, Standard unlocks
-4. **Restart to switch levels**: Click "Restart" button to begin Standard
-5. **Repeat for Advanced**: Complete Standard to unlock Advanced
+### Multi-Level Lessons (W03, W04):
+1. Start Week 3 → See **[Basic]** in title
+2. Navigate through steps with "Next →"
+3. Progress bar fills automatically (Step 1/4 → 2/4 → 3/4 → 4/4)
+4. On **final step**, "Complete Level ✓" button appears
+5. Click "Complete Level ✓"
+6. Prompt: "🎉 Congratulations! You've completed Basic level! Standard level is now unlocked. Are you ready for Standard level?"
+7. Click **OK** → Auto-loads Standard level from Step 1
+8. Click **Cancel** → Stay on Basic, can restart anytime to try Standard
 
-Progress is saved automatically in your browser's localStorage.
+### Single-Level Lessons (W01, W02):
+- Simple progression through steps
+- No level system
+- Progress bar shows completion
 
 ## 🔧 Creating Multi-Level Lessons
 
@@ -120,7 +136,9 @@ Use this JSON structure for lessons with difficulty levels:
 - All files must be in the same directory
 - Requires internet connection for scratchblocks CDN
 - Progress saved per lesson in browser localStorage
-- Level progress saved separately from step progress
+- Level progress saved separately
+- Progress bar updates automatically based on current step
+- "Complete Level ✓" button only appears on final step
 - Compatible with all modern browsers
 
 ## 🎯 Animation Technical Details
@@ -145,15 +163,13 @@ Use this JSON structure for lessons with difficulty levels:
 - Ensure CSS loads: https://scratchblocks.github.io/scratchblocks/scratchblocks.css
 - Check if CDN is blocked by network
 
-**Levels not unlocking?**
-- Complete ALL steps in current level (click "Done ✓" on each)
-- Watch for unlock notification alert
-- Click "Restart" to begin next level
+**Level not unlocking?**
+- Must reach the **final step** of current level
+- "Complete Level ✓" button only appears on last step
+- Click "Complete Level ✓" to trigger unlock prompt
 
-**Animation issues?**
-- Particles should stop at bubble bottom
-- Red/blue should drift toward yellow when thinking
-- Hard refresh (Ctrl+Shift+R) if animation glitches
+**Want to try next level without prompt?**
+- Click "Restart" button to switch between unlocked levels
 
 ---
 

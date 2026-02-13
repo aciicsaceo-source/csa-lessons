@@ -18,7 +18,7 @@ let cortexSpikeUntil=0;
 
 const elTitle=qs("#lessonTitle"), elBubble=qs("#bubbleText"), elStepPill=qs("#stepPill"), elStepTitle=qs("#stepTitle");
 const elBlocks=qs("#blocksSvg"), elBlocksFallback=qs("#blocksFallback"), elBlocksStatus=qs("#blocksStatus"), elProgress=qs("#progressBar");
-const btnBack=qs("#backBtn"), btnNext=qs("#nextBtn"), btnDone=qs("#doneBtn"), btnHint=qs("#hintBtn"), btnRestart=qs("#restartBtn");
+const btnBack=qs("#backBtn"), btnNext=qs("#nextBtn"), btnComplete=qs("#completeBtn"), btnHint=qs("#hintBtn"), btnRestart=qs("#restartBtn");
 const hintBox=qs("#hintBox"), elHintText=qs("#hintText");
 const bubbleEl=qs("#bubble");
 
@@ -47,7 +47,6 @@ async function loadScratchblocks(){
       return true;
     }
     
-    // Load CSS first (critical for rendering)
     const cssUrls = [
       "https://cdn.jsdelivr.net/npm/scratchblocks@3.6.4/build/scratchblocks.min.css",
       "https://unpkg.com/scratchblocks@3.6.4/build/scratchblocks.min.css"
@@ -60,11 +59,10 @@ async function loadScratchblocks(){
       link.onload = () => { cssLoaded = true; };
       link.onerror = () => { console.warn("[CSA] CSS failed from", cssUrl); };
       document.head.appendChild(link);
-      await new Promise(r => setTimeout(r, 100)); // brief wait
+      await new Promise(r => setTimeout(r, 100));
       if(cssLoaded) break;
     }
     
-    // IMPORTANT: unpkg is often blocked on some networks. Use jsDelivr first.
     const sources = [
       "https://cdn.jsdelivr.net/npm/scratchblocks@3.6.4/build/scratchblocks.min.js",
       "https://unpkg.com/scratchblocks@3.6.4/build/scratchblocks.min.js"
@@ -105,17 +103,16 @@ const PAL={ red:"#ff3b30", amber:"#ffb020", blue:"#1e86ff" };
 const particles=[];
 let lastEmit=0;
 
-// Adjusted positions: shift left by different amounts for each cube
 const CM_TO_PX = 37.8;
 const CUBE_CENTERS = { 
-  left: 0.33,   // Red cube - shift left 1.1cm
-  mid: 0.50,    // Amber cube - shift left 0.8cm
-  right: 0.67   // Blue cube - shift left 0.3cm
+  left: 0.33,
+  mid: 0.50,
+  right: 0.67
 };
 const CUBE_OFFSETS = {
-  left: -1.1 * CM_TO_PX,    // -41.58px
-  mid: -0.8 * CM_TO_PX,     // -30.24px
-  right: -0.3 * CM_TO_PX    // -11.34px
+  left: -1.1 * CM_TO_PX,
+  mid: -0.8 * CM_TO_PX,
+  right: -0.3 * CM_TO_PX
 };
 
 const EMIT_Y_RATIO = 0.30;
@@ -148,50 +145,43 @@ function emit(){
 
   const originY = top + h * EMIT_Y_RATIO;
 
-  // Calculate center positions with left shift offsets
   const leftX  = left + w * CUBE_CENTERS.left + CUBE_OFFSETS.left;
   const midX   = left + w * CUBE_CENTERS.mid + CUBE_OFFSETS.mid;
   const rightX = left + w * CUBE_CENTERS.right + CUBE_OFFSETS.right;
 
-  // Idle: slow floating dots from each cube center
   if(!active){
-    // Red cube - slow red dots
     spawnDot(leftX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.red,
       0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
     
-    // Amber cube - slow amber dots  
     spawnDot(midX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.amber,
       0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
     
-    // Blue cube - slow blue dots
     spawnDot(rightX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.blue,
       0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
   }
 
-  // Active (thinking): burst of faster, brighter dots - RED and BLUE drift toward YELLOW
   if(active){
-    const burstCount = 15; // Reduced from 25 for less intensity
+    const burstCount = 15;
     for(let i=0;i<burstCount;i++){
       const r = Math.random();
       let x, color, vx;
       
-      // More amber (yellow) dots when thinking, some red/blue
       if(r < 0.60){ 
         x = midX + (Math.random()-0.5)*20; 
         color = PAL.amber;
-        vx = 0; // Yellow stays centered
+        vx = 0;
       } else if(r < 0.80){ 
         x = rightX + (Math.random()-0.5)*20; 
         color = PAL.blue;
-        vx = (midX - rightX) * 0.008; // Blue drifts LEFT toward yellow
+        vx = (midX - rightX) * 0.008;
       } else { 
         x = leftX + (Math.random()-0.5)*20; 
         color = PAL.red;
-        vx = (midX - leftX) * 0.008; // Red drifts RIGHT toward yellow
+        vx = (midX - leftX) * 0.008;
       }
 
       spawnDot(x, originY + Math.random()*5, color,
-        1.2+Math.random()*1.8, 0.4+Math.random()*0.25, 3+Math.random()*3, vx); // Reduced speed and alpha
+        1.2+Math.random()*1.8, 0.4+Math.random()*0.25, 3+Math.random()*3, vx);
     }
   }
 }
@@ -212,13 +202,11 @@ function cortexTick(){
     const fade=Math.max(0,1-p.life/p.maxLife);
     ctx.globalAlpha=p.alpha*fade;
 
-    // Draw dots instead of lines
     ctx.fillStyle=p.color;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     ctx.fill();
 
-    // Remove if: reached max life, went off top, OR reached bubble bottom
     if(p.life>=p.maxLife || p.y<-240 || p.y <= bubbleBottom) {
       particles.splice(i,1);
     }
@@ -245,12 +233,10 @@ function saveLevelProgress(lessonId, unlockedLevel, completedLevels){
 function unlockNextLevel(lessonId, currentLevel){
   const levelProgress = getLevelProgress(lessonId);
   
-  // Add current level to completed if not already there
   if(!levelProgress.completedLevels.includes(currentLevel)){
     levelProgress.completedLevels.push(currentLevel);
   }
   
-  // Unlock next level
   if(currentLevel === 'basic' && levelProgress.unlockedLevel === 'basic'){
     levelProgress.unlockedLevel = 'standard';
   } else if(currentLevel === 'standard' && levelProgress.unlockedLevel === 'standard'){
@@ -265,7 +251,6 @@ function getCurrentSteps(lesson){
   const levelProgress = getLevelProgress(lesson.lessonId);
   const currentLevel = levelProgress.unlockedLevel;
   
-  // Return steps based on unlocked level
   if(currentLevel === 'basic' && lesson.steps_basic){
     return {steps: lesson.steps_basic, level: 'basic'};
   } else if(currentLevel === 'standard' && lesson.steps_standard){
@@ -274,7 +259,6 @@ function getCurrentSteps(lesson){
     return {steps: lesson.steps_advanced, level: 'advanced'};
   }
   
-  // Fallback to basic or generic steps
   return {steps: lesson.steps_basic || lesson.steps || [], level: 'basic'};
 }
 
@@ -298,7 +282,6 @@ function loadProgress(id){
 }
 function clearProgress(id){ 
   localStorage.removeItem(key(id)); 
-  // Don't clear level progress on restart
 }
 
 async function typeBubble(text){
@@ -333,7 +316,6 @@ async function renderBlocks(blocksText){
   }
 
   console.log("[CSA] Attempting to render blocks:", t);
-  console.log("[CSA] scratchblocks version:", window.scratchblocks);
 
   const pre=document.createElement("pre");
   pre.className="blocks";
@@ -349,7 +331,6 @@ async function renderBlocks(blocksText){
     const hasSvg = elBlocks.querySelector("svg");
     if(!hasSvg){
       console.warn("[CSA] scratchblocks rendered but no SVG found; falling back to text");
-      console.log("[CSA] elBlocks content:", elBlocks.innerHTML);
       elBlocksFallback.textContent=t;
       elBlocksFallback.classList.remove("hidden");
       setBlocksStatus("Scratchblocks returned no SVG. Check console.");
@@ -359,7 +340,6 @@ async function renderBlocks(blocksText){
     }
   }catch(e){
     console.error("[CSA] scratchblocks render error:", e);
-    console.error("[CSA] Error details:", e.message, e.stack);
     setBlocksStatus("Scratch blocks render error: " + e.message);
     elBlocksFallback.textContent=t;
     elBlocksFallback.classList.remove("hidden");
@@ -369,7 +349,7 @@ async function renderBlocks(blocksText){
 function setProgress(){
   const currentData = getCurrentSteps(lesson);
   const total = currentData.steps.length;
-  const pct=Math.round((doneSteps.size/total)*100);
+  const pct=Math.round(((stepIndex+1)/total)*100);
   elProgress.style.width=`${pct}%`;
 }
 
@@ -388,6 +368,7 @@ async function renderStep(){
   const step = currentData.steps[stepIndex];
   const total = currentData.steps.length;
   const levelLabel = currentData.level.charAt(0).toUpperCase() + currentData.level.slice(1);
+  const isLastStep = (stepIndex === total - 1);
 
   elTitle.textContent=`${lesson.year} · ${lesson.term} · ${lesson.week} – ${lesson.title} [${levelLabel}]`;
   elStepPill.textContent=`Step ${stepIndex+1} of ${total}`;
@@ -403,52 +384,67 @@ async function renderStep(){
   setProgress();
 
   btnBack.disabled=(stepIndex===0);
-  btnNext.disabled=(stepIndex===total-1);
+  btnNext.disabled=isLastStep;
   
-  // Check if all steps are done - unlock next level
-  checkLevelCompletion();
+  // Show Complete button only on last step
+  if(isLastStep){
+    btnComplete.classList.remove("hidden");
+    btnNext.classList.add("hidden");
+  } else {
+    btnComplete.classList.add("hidden");
+    btnNext.classList.remove("hidden");
+  }
 }
 
-function checkLevelCompletion(){
+async function completeLevel(){
   const currentData = getCurrentSteps(lesson);
-  const total = currentData.steps.length;
+  const newLevel = unlockNextLevel(lesson.lessonId, currentData.level);
   
-  if(doneSteps.size === total){
-    // All steps completed! Unlock next level
-    const newLevel = unlockNextLevel(lesson.lessonId, currentData.level);
+  spike();
+  
+  if(newLevel !== currentData.level){
+    const levelNames = {basic: 'Basic', standard: 'Standard', advanced: 'Advanced'};
+    const ready = confirm(`🎉 Congratulations! You've completed ${levelNames[currentData.level]} level!\n\n${levelNames[newLevel]} level is now unlocked.\n\nAre you ready for ${levelNames[newLevel]} level?`);
     
-    if(newLevel !== currentData.level){
-      // Show notification
-      const levelNames = {basic: 'Basic', standard: 'Standard', advanced: 'Advanced'};
-      alert(`🎉 Congratulations! You've completed ${levelNames[currentData.level]} level!\n\n${levelNames[newLevel]} level is now unlocked. Click Restart to try it!`);
+    if(ready){
+      // Transition to next level
+      clearProgress(lesson.lessonId);
+      stepIndex = 0;
+      doneSteps = new Set();
+      await renderStep();
+    } else {
+      // Stay on current completed level
+      alert("No problem! Click 'Restart' anytime to try " + levelNames[newLevel] + " level.");
     }
+  } else {
+    // No more levels
+    alert("🎉 Amazing work! You've completed all levels for this lesson!");
   }
 }
 
 btnBack.addEventListener("click", async ()=>{
   stepIndex=Math.max(0, stepIndex-1);
   spike();
-  await renderStep(); save(lesson.lessonId);
+  await renderStep(); 
+  save(lesson.lessonId);
 });
+
 btnNext.addEventListener("click", async ()=>{
   const currentData = getCurrentSteps(lesson);
   if(stepIndex>=currentData.steps.length-1) return;
   stepIndex++;
   spike();
-  await renderStep(); save(lesson.lessonId);
-});
-btnDone.addEventListener("click", ()=>{
-  doneSteps.add(stepIndex);
+  await renderStep(); 
   save(lesson.lessonId);
-  setProgress();
-  spike();
-  checkLevelCompletion();
 });
+
+btnComplete.addEventListener("click", completeLevel);
 btnHint.addEventListener("click", showHint);
 
 btnRestart.addEventListener("click", async ()=>{
   clearProgress(lesson.lessonId);
-  stepIndex=0; doneSteps=new Set();
+  stepIndex=0; 
+  doneSteps=new Set();
   spike();
   await renderStep();
 });

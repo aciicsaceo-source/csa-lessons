@@ -3,7 +3,7 @@
   "term": "Term 1",
   "week": "Week 4",
   "title": "Reaction Timer",
-  "steps_basic": [
+  "steps": [
     {
       "title": "Create two backdrops",
       "instruction": "Click on the Stage (bottom right), then click Backdrops tab. Create two backdrops: one with big text 'WAIT' and another with 'GO'.",
@@ -39,118 +39,6 @@
       "instruction": "Click green flag, wait for GO to appear, then click anywhere on the stage. Your reaction time should appear!",
       "hint": "Don't click too early! Wait for the backdrop to change to GO first.",
       "blocks_text": "when green flag clicked\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds\nreset timer\nswitch backdrop to [GO v]\n\nwhen stage clicked\nsay (timer) for (2) seconds"
-    }
-  ],
-  "steps_standard": [
-    {
-      "title": "Start with Basic code",
-      "instruction": "You've unlocked Standard level! You'll add best time tracking and anti-cheat. Make sure Basic works first.",
-      "hint": "You should have: WAIT/GO backdrops, random wait, timer reset, and click detection.",
-      "blocks_text": ""
-    },
-    {
-      "title": "Create bestTime variable",
-      "instruction": "Make a new variable called 'bestTime' (for all sprites). This will track your fastest reaction time.",
-      "hint": "Variables → Make a Variable → type 'bestTime' → OK",
-      "blocks_text": ""
-    },
-    {
-      "title": "Initialize bestTime",
-      "instruction": "In the 'when green flag clicked' script, add 'set bestTime to 999' at the very start.",
-      "hint": "Set it to a high number (999) so any real time will be better.",
-      "blocks_text": "when green flag clicked\nset [bestTime v] to (999)\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds\nreset timer\nswitch backdrop to [GO v]"
-    },
-    {
-      "title": "Create state variable",
-      "instruction": "Make another variable called 'state'. This tracks whether we're in WAIT or GO phase.",
-      "hint": "Variables → Make a Variable → type 'state' → OK",
-      "blocks_text": ""
-    },
-    {
-      "title": "Set state to WAIT at start",
-      "instruction": "After setting bestTime, add 'set state to WAIT'. After switching to WAIT backdrop, keep state as WAIT.",
-      "hint": "The state should match which backdrop is showing.",
-      "blocks_text": "when green flag clicked\nset [bestTime v] to (999)\nset [state v] to [WAIT]\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds\nreset timer\nswitch backdrop to [GO v]"
-    },
-    {
-      "title": "Set state to GO when ready",
-      "instruction": "After 'switch backdrop to GO', add 'set state to GO'.",
-      "hint": "Now state will be GO when it's time to click!",
-      "blocks_text": "when green flag clicked\nset [bestTime v] to (999)\nset [state v] to [WAIT]\nswitch backdrop to [WAIT v]\nwait (pick random (1) to (5)) seconds\nreset timer\nset [state v] to [GO]\nswitch backdrop to [GO v]"
-    },
-    {
-      "title": "Add anti-cheat check",
-      "instruction": "In 'when stage clicked', add an 'if then else': if state = WAIT, say 'Too early!' and don't record time.",
-      "hint": "Operators → (state) = [WAIT]. This prevents cheating by clicking early!",
-      "blocks_text": "when stage clicked\nif <(state) = [WAIT]> then\n  say [Too early! Wait for GO!] for (2) seconds\nelse\n  say (timer) for (2) seconds"
-    },
-    {
-      "title": "Update best time",
-      "instruction": "In the else part (when state = GO), add 'if timer < bestTime then set bestTime to timer'.",
-      "hint": "This saves your best time! Operators → (timer) < (bestTime)",
-      "blocks_text": "when stage clicked\nif <(state) = [WAIT]> then\n  say [Too early! Wait for GO!] for (2) seconds\nelse\n  say (timer) for (2) seconds\n  if <(timer) < (bestTime)> then\n    set [bestTime v] to (timer)"
-    },
-    {
-      "title": "Show bestTime on stage",
-      "instruction": "Check the box next to bestTime variable to show it on stage. Test and try to beat your best time!",
-      "hint": "Click the checkbox in the Variables category to show/hide variables on stage.",
-      "blocks_text": ""
-    }
-  ],
-  "steps_advanced": [
-    {
-      "title": "Start with Standard code",
-      "instruction": "You've unlocked Advanced level! You'll add multiple rounds and calculate average time. Make sure Standard works.",
-      "hint": "You should have: WAIT/GO system, state tracking, bestTime, and anti-cheat.",
-      "blocks_text": ""
-    },
-    {
-      "title": "Create round and total variables",
-      "instruction": "Make two new variables: 'round' and 'total'. Round tracks which round you're on, total adds up all times.",
-      "hint": "Variables → Make a Variable → 'round'. Then make another one → 'total'.",
-      "blocks_text": ""
-    },
-    {
-      "title": "Initialize round and total",
-      "instruction": "At the start of 'when green flag clicked', set round to 0 and total to 0.",
-      "hint": "Add these right after setting bestTime to 999.",
-      "blocks_text": "when green flag clicked\nset [bestTime v] to (999)\nset [round v] to (0)\nset [total v] to (0)\nset [state v] to [WAIT]"
-    },
-    {
-      "title": "Create a 3-round loop",
-      "instruction": "Wrap the WAIT → random wait → GO sequence inside a 'repeat 3' loop.",
-      "hint": "Control → repeat (3). Put everything from 'switch backdrop to WAIT' to 'switch backdrop to GO' inside.",
-      "blocks_text": "when green flag clicked\nset [bestTime v] to (999)\nset [round v] to (0)\nset [total v] to (0)\nrepeat (3)\n  set [state v] to [WAIT]\n  switch backdrop to [WAIT v]\n  wait (pick random (1) to (5)) seconds\n  reset timer\n  set [state v] to [GO]\n  switch backdrop to [GO v]"
-    },
-    {
-      "title": "Wait for click before next round",
-      "instruction": "After 'switch backdrop to GO', add 'wait until <mouse down?>'. Then change round by 1.",
-      "hint": "Sensing → mouse down? Control → wait until. This waits for the player to click before starting next round.",
-      "blocks_text": "when green flag clicked\nset [bestTime v] to (999)\nset [round v] to (0)\nset [total v] to (0)\nrepeat (3)\n  set [state v] to [WAIT]\n  switch backdrop to [WAIT v]\n  wait (pick random (1) to (5)) seconds\n  reset timer\n  set [state v] to [GO]\n  switch backdrop to [GO v]\n  wait until <mouse down?>\n  change [round v] by (1)"
-    },
-    {
-      "title": "Capture time and add to total",
-      "instruction": "After 'wait until mouse down', add 'change total by (timer)'. This adds the reaction time to total.",
-      "hint": "Sensing → timer goes inside the change block.",
-      "blocks_text": "wait until <mouse down?>\nchange [total v] by (timer)\nchange [round v] by (1)"
-    },
-    {
-      "title": "Calculate and show average",
-      "instruction": "After the 'repeat 3' loop ends, create a variable 'average'. Set average to total / 3. Say 'Average: (average)'.",
-      "hint": "Variables → Make Variable → 'average'. Operators → (total) / (3)",
-      "blocks_text": "after the repeat loop:\nset [average v] to ((total) / (3))\nsay (join [Average: ] (average)) for (3) seconds"
-    },
-    {
-      "title": "Optional: Add Restart button",
-      "instruction": "Create a sprite button labeled 'Restart'. When clicked, it broadcasts 'RESTART'. Stage receives RESTART and reruns green flag code.",
-      "hint": "Create new sprite → paint 'Restart' text. Events → when this sprite clicked → broadcast RESTART. Stage → when I receive RESTART → run the setup again.",
-      "blocks_text": "Restart button sprite:\nwhen this sprite clicked\nbroadcast [RESTART v]\n\nStage:\nwhen I receive [RESTART v]\nset [bestTime v] to (999)\nset [round v] to (0)\nset [total v] to (0)\n..."
-    },
-    {
-      "title": "Test your advanced timer",
-      "instruction": "Click green flag. Complete 3 rounds. Check your average time. Try to improve it! Mark Done when it works!",
-      "hint": "The game should run 3 rounds automatically, then show your average reaction time.",
-      "blocks_text": ""
     }
   ]
 }
