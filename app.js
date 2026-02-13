@@ -219,37 +219,46 @@ function cortexTick(){
 function getLevelProgress(lessonId){
   try{
     const raw = localStorage.getItem(`CSA_LEVEL__${lessonId}`);
-    if(!raw) return {unlockedLevel: 'basic', completedLevels: []};
-    return JSON.parse(raw);
+    if(!raw) return {unlockedLevel: 'basic', currentLevel: 'basic', completedLevels: []};
+    const data = JSON.parse(raw);
+    // Ensure currentLevel exists for backward compatibility
+    if(!data.currentLevel) data.currentLevel = data.unlockedLevel || 'basic';
+    return data;
   }catch(_){
-    return {unlockedLevel: 'basic', completedLevels: []};
+    return {unlockedLevel: 'basic', currentLevel: 'basic', completedLevels: []};
   }
 }
 
-function saveLevelProgress(lessonId, unlockedLevel, completedLevels){
-  localStorage.setItem(`CSA_LEVEL__${lessonId}`, JSON.stringify({unlockedLevel, completedLevels}));
+function saveLevelProgress(lessonId, unlockedLevel, currentLevel, completedLevels){
+  localStorage.setItem(`CSA_LEVEL__${lessonId}`, JSON.stringify({unlockedLevel, currentLevel, completedLevels}));
 }
 
-function unlockNextLevel(lessonId, currentLevel){
+function unlockNextLevel(lessonId, completedLevel){
   const levelProgress = getLevelProgress(lessonId);
   
-  if(!levelProgress.completedLevels.includes(currentLevel)){
-    levelProgress.completedLevels.push(currentLevel);
+  if(!levelProgress.completedLevels.includes(completedLevel)){
+    levelProgress.completedLevels.push(completedLevel);
   }
   
-  if(currentLevel === 'basic' && levelProgress.unlockedLevel === 'basic'){
-    levelProgress.unlockedLevel = 'standard';
-  } else if(currentLevel === 'standard' && levelProgress.unlockedLevel === 'standard'){
-    levelProgress.unlockedLevel = 'advanced';
+  let newUnlockedLevel = levelProgress.unlockedLevel;
+  if(completedLevel === 'basic' && levelProgress.unlockedLevel === 'basic'){
+    newUnlockedLevel = 'standard';
+  } else if(completedLevel === 'standard' && levelProgress.unlockedLevel === 'standard'){
+    newUnlockedLevel = 'advanced';
   }
   
-  saveLevelProgress(lessonId, levelProgress.unlockedLevel, levelProgress.completedLevels);
-  return levelProgress.unlockedLevel;
+  saveLevelProgress(lessonId, newUnlockedLevel, levelProgress.currentLevel, levelProgress.completedLevels);
+  return newUnlockedLevel;
+}
+
+function setCurrentLevel(lessonId, level){
+  const levelProgress = getLevelProgress(lessonId);
+  saveLevelProgress(lessonId, levelProgress.unlockedLevel, level, levelProgress.completedLevels);
 }
 
 function getCurrentSteps(lesson){
   const levelProgress = getLevelProgress(lesson.lessonId);
-  const currentLevel = levelProgress.unlockedLevel;
+  const currentLevel = levelProgress.currentLevel;
   
   if(currentLevel === 'basic' && lesson.steps_basic){
     return {steps: lesson.steps_basic, level: 'basic'};
@@ -398,23 +407,28 @@ async function renderStep(){
 
 async function completeLevel(){
   const currentData = getCurrentSteps(lesson);
-  const newLevel = unlockNextLevel(lesson.lessonId, currentData.level);
+  const currentLevel = currentData.level;
+  const newUnlockedLevel = unlockNextLevel(lesson.lessonId, currentLevel);
   
   spike();
   
-  if(newLevel !== currentData.level){
+  if(newUnlockedLevel !== currentLevel){
     const levelNames = {basic: 'Basic', standard: 'Standard', advanced: 'Advanced'};
-    const ready = confirm(`🎉 Congratulations! You've completed ${levelNames[currentData.level]} level!\n\n${levelNames[newLevel]} level is now unlocked.\n\nAre you ready for ${levelNames[newLevel]} level?`);
+    const ready = confirm(`🎉 Congratulations! You've completed ${levelNames[currentLevel]} level!\n\n${levelNames[newUnlockedLevel]} level is now unlocked.\n\nAre you ready for ${levelNames[newUnlockedLevel]} level?`);
     
     if(ready){
-      // Transition to next level
+      // Switch to the new level
+      setCurrentLevel(lesson.lessonId, newUnlockedLevel);
+      
+      // Reset progress and render new level
       clearProgress(lesson.lessonId);
       stepIndex = 0;
       doneSteps = new Set();
+      
       await renderStep();
     } else {
       // Stay on current completed level
-      alert("No problem! Click 'Restart' anytime to try " + levelNames[newLevel] + " level.");
+      alert("No problem! Click 'Restart' anytime to try " + levelNames[newUnlockedLevel] + " level.");
     }
   } else {
     // No more levels
