@@ -3,7 +3,6 @@ const qs = (s)=>document.querySelector(s);
 
 function cleanText(s){
   if(!s) return "";
-  // Fixed: removed the \\n replacement that was causing garbled text
   return String(s)
     .replace(/<[^>]*>/g,"")
     .replace(/\u00a0/g," ")
@@ -24,6 +23,7 @@ const hintBox=qs("#hintBox"), elHintText=qs("#hintText");
 const bubbleEl=qs("#bubble");
 const zoomControls=qs("#zoomControls"), zoomLevel=qs("#zoomLevel");
 const btnZoomIn=qs("#zoomInBtn"), btnZoomOut=qs("#zoomOutBtn"), btnZoomReset=qs("#zoomResetBtn");
+const levelSelector=qs("#levelSelector");
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -70,7 +70,7 @@ async function loadScratchblocks(){
       "https://cdn.jsdelivr.net/npm/scratchblocks@3.6.4/build/scratchblocks.min.js",
       "https://unpkg.com/scratchblocks@3.6.4/build/scratchblocks.min.js"
     ];
-    setBlocksStatus("Loading Scratch blocks renderer… (if it fails, your network may block CDNs)");
+    setBlocksStatus("Loading Scratch blocks renderer…");
     for(const src of sources){
       console.log("[CSA] loading scratchblocks:", src);
       const ok = await injectScript(src);
@@ -82,7 +82,7 @@ async function loadScratchblocks(){
       console.warn("[CSA] failed to load from", src);
     }
     console.error("[CSA] scratchblocks failed to load from all CDNs.");
-    setBlocksStatus("Scratch blocks failed to load (CDN blocked). You'll see text blocks for now.");
+    setBlocksStatus("Scratch blocks failed to load (CDN blocked).");
     return false;
   })();
   return scratchblocksReady;
@@ -100,7 +100,7 @@ function autoZoomToFit(){
   
   const container = elBlocks.parentElement;
   const svgHeight = svg.getBoundingClientRect().height;
-  const containerHeight = container.clientHeight - 80; // Account for padding/controls
+  const containerHeight = container.clientHeight - 80;
   
   if(svgHeight > containerHeight){
     currentZoom = Math.max(0.4, containerHeight / svgHeight);
@@ -125,7 +125,7 @@ btnZoomReset.addEventListener("click", ()=>{
   autoZoomToFit();
 });
 
-// === Cortex (dots floating from cube centers, stop at bubble) ===
+// === Cortex Animation ===
 const logoImg=qs("#csaLogo");
 const leftPanel=qs("#leftPanel");
 const canvas=qs("#cortexCanvas");
@@ -144,17 +144,8 @@ const particles=[];
 let lastEmit=0;
 
 const CM_TO_PX = 37.8;
-const CUBE_CENTERS = { 
-  left: 0.33,
-  mid: 0.50,
-  right: 0.67
-};
-const CUBE_OFFSETS = {
-  left: -1.1 * CM_TO_PX,
-  mid: -0.8 * CM_TO_PX,
-  right: -0.3 * CM_TO_PX
-};
-
+const CUBE_CENTERS = { left: 0.33, mid: 0.50, right: 0.67 };
+const CUBE_OFFSETS = { left: -1.1 * CM_TO_PX, mid: -0.8 * CM_TO_PX, right: -0.3 * CM_TO_PX };
 const EMIT_Y_RATIO = 0.30;
 const EMIT_IDLE_MS = 200;
 const EMIT_ACTIVE_MS = 40;
@@ -184,20 +175,14 @@ function emit(){
   const h    = rect.height;
 
   const originY = top + h * EMIT_Y_RATIO;
-
   const leftX  = left + w * CUBE_CENTERS.left + CUBE_OFFSETS.left;
   const midX   = left + w * CUBE_CENTERS.mid + CUBE_OFFSETS.mid;
   const rightX = left + w * CUBE_CENTERS.right + CUBE_OFFSETS.right;
 
   if(!active){
-    spawnDot(leftX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.red,
-      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
-    
-    spawnDot(midX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.amber,
-      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
-    
-    spawnDot(rightX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.blue,
-      0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
+    spawnDot(leftX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.red, 0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
+    spawnDot(midX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.amber, 0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
+    spawnDot(rightX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.blue, 0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
   }
 
   if(active){
@@ -205,23 +190,10 @@ function emit(){
     for(let i=0;i<burstCount;i++){
       const r = Math.random();
       let x, color, vx;
-      
-      if(r < 0.60){ 
-        x = midX + (Math.random()-0.5)*20; 
-        color = PAL.amber;
-        vx = 0;
-      } else if(r < 0.80){ 
-        x = rightX + (Math.random()-0.5)*20; 
-        color = PAL.blue;
-        vx = (midX - rightX) * 0.008;
-      } else { 
-        x = leftX + (Math.random()-0.5)*20; 
-        color = PAL.red;
-        vx = (midX - leftX) * 0.008;
-      }
-
-      spawnDot(x, originY + Math.random()*5, color,
-        1.2+Math.random()*1.8, 0.4+Math.random()*0.25, 3+Math.random()*3, vx);
+      if(r < 0.60){ x = midX + (Math.random()-0.5)*20; color = PAL.amber; vx = 0; }
+      else if(r < 0.80){ x = rightX + (Math.random()-0.5)*20; color = PAL.blue; vx = (midX - rightX) * 0.008; }
+      else { x = leftX + (Math.random()-0.5)*20; color = PAL.red; vx = (midX - leftX) * 0.008; }
+      spawnDot(x, originY + Math.random()*5, color, 1.2+Math.random()*1.8, 0.4+Math.random()*0.25, 3+Math.random()*3, vx);
     }
   }
 }
@@ -230,26 +202,19 @@ function cortexTick(){
   resizeCanvas();
   ctx.clearRect(0,0,canvas.width,canvas.height);
   emit();
-
   const bubbleBottom = getBubbleBottomY();
-
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
     p.life++;
     p.y-=p.vy;
     p.x+=p.vx;
-
     const fade=Math.max(0,1-p.life/p.maxLife);
     ctx.globalAlpha=p.alpha*fade;
-
     ctx.fillStyle=p.color;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     ctx.fill();
-
-    if(p.life>=p.maxLife || p.y<-240 || p.y <= bubbleBottom) {
-      particles.splice(i,1);
-    }
+    if(p.life>=p.maxLife || p.y<-240 || p.y <= bubbleBottom) particles.splice(i,1);
   }
   ctx.globalAlpha=1;
   requestAnimationFrame(cortexTick);
@@ -274,18 +239,15 @@ function saveLevelProgress(lessonId, unlockedLevel, currentLevel, completedLevel
 
 function unlockNextLevel(lessonId, completedLevel){
   const levelProgress = getLevelProgress(lessonId);
-  
   if(!levelProgress.completedLevels.includes(completedLevel)){
     levelProgress.completedLevels.push(completedLevel);
   }
-  
   let newUnlockedLevel = levelProgress.unlockedLevel;
   if(completedLevel === 'basic' && levelProgress.unlockedLevel === 'basic'){
     newUnlockedLevel = 'standard';
   } else if(completedLevel === 'standard' && levelProgress.unlockedLevel === 'standard'){
     newUnlockedLevel = 'advanced';
   }
-  
   saveLevelProgress(lessonId, newUnlockedLevel, levelProgress.currentLevel, levelProgress.completedLevels);
   return newUnlockedLevel;
 }
@@ -306,9 +268,53 @@ function getCurrentSteps(lesson){
   } else if(currentLevel === 'advanced' && lesson.steps_advanced){
     return {steps: lesson.steps_advanced, level: 'advanced'};
   }
-  
   return {steps: lesson.steps_basic || lesson.steps || [], level: 'basic'};
 }
+
+function updateLevelSelector(){
+  const levelProgress = getLevelProgress(lesson.lessonId);
+  
+  // Enable/disable options based on unlocked levels
+  Array.from(levelSelector.options).forEach(option => {
+    const level = option.value;
+    if(level === 'basic'){
+      option.disabled = false;
+    } else if(level === 'standard'){
+      option.disabled = levelProgress.unlockedLevel === 'basic';
+    } else if(level === 'advanced'){
+      option.disabled = levelProgress.unlockedLevel !== 'advanced';
+    }
+  });
+  
+  // Set current selection
+  levelSelector.value = levelProgress.currentLevel;
+}
+
+// Level selector change handler
+levelSelector.addEventListener('change', async ()=>{
+  const selectedLevel = levelSelector.value;
+  const levelProgress = getLevelProgress(lesson.lessonId);
+  
+  // Check if level is unlocked
+  if(selectedLevel === 'standard' && levelProgress.unlockedLevel === 'basic'){
+    alert('Standard level is locked. Complete Basic level first!');
+    levelSelector.value = levelProgress.currentLevel;
+    return;
+  }
+  if(selectedLevel === 'advanced' && levelProgress.unlockedLevel !== 'advanced'){
+    alert('Advanced level is locked. Complete Standard level first!');
+    levelSelector.value = levelProgress.currentLevel;
+    return;
+  }
+  
+  // Switch to selected level
+  setCurrentLevel(lesson.lessonId, selectedLevel);
+  clearProgress(lesson.lessonId);
+  stepIndex = 0;
+  doneSteps = new Set();
+  spike();
+  await renderStep();
+});
 
 // === Lesson loader & UI ===
 function getLessonId(){ return new URL(location.href).searchParams.get("lesson") || DEFAULT_LESSON; }
@@ -328,9 +334,7 @@ function loadProgress(id){
     doneSteps=new Set(p.done||[]);
   }catch(_){}
 }
-function clearProgress(id){ 
-  localStorage.removeItem(key(id)); 
-}
+function clearProgress(id){ localStorage.removeItem(key(id)); }
 
 async function typeBubble(text){
   typingAbort.abort=true; await sleep(10); typingAbort={abort:false};
@@ -364,34 +368,27 @@ async function renderBlocks(blocksText){
     return;
   }
 
-  console.log("[CSA] Attempting to render blocks:", t);
-
   const pre=document.createElement("pre");
   pre.className="blocks";
   pre.textContent=t;
   elBlocks.appendChild(pre);
 
   try{
-    console.log("[CSA] Calling scratchblocks.render...");
     scratchblocks.renderMatching("pre.blocks", {style:"scratch3"});
-    
     await sleep(200);
-    
     const hasSvg = elBlocks.querySelector("svg");
     if(!hasSvg){
-      console.warn("[CSA] scratchblocks rendered but no SVG found; falling back to text");
       elBlocksFallback.textContent=t;
       elBlocksFallback.classList.remove("hidden");
-      setBlocksStatus("Scratchblocks returned no SVG. Check console.");
+      setBlocksStatus("Scratchblocks returned no SVG.");
     }else{
-      console.log("[CSA] SVG rendered successfully!");
       setBlocksStatus("");
       zoomControls.classList.remove("hidden");
       autoZoomToFit();
     }
   }catch(e){
     console.error("[CSA] scratchblocks render error:", e);
-    setBlocksStatus("Scratch blocks render error: " + e.message);
+    setBlocksStatus("Scratch blocks render error.");
     elBlocksFallback.textContent=t;
     elBlocksFallback.classList.remove("hidden");
   }
@@ -433,6 +430,7 @@ async function renderStep(){
   await renderBlocks(blocks);
 
   setProgress();
+  updateLevelSelector();
 
   btnBack.disabled=(stepIndex===0);
   btnNext.disabled=isLastStep;
@@ -450,7 +448,6 @@ async function completeLevel(){
   const currentData = getCurrentSteps(lesson);
   const currentLevel = currentData.level;
   const newUnlockedLevel = unlockNextLevel(lesson.lessonId, currentLevel);
-  
   spike();
   
   if(newUnlockedLevel !== currentLevel){
@@ -459,14 +456,12 @@ async function completeLevel(){
     
     if(ready){
       setCurrentLevel(lesson.lessonId, newUnlockedLevel);
-      
       clearProgress(lesson.lessonId);
       stepIndex = 0;
       doneSteps = new Set();
-      
       await renderStep();
     } else {
-      alert("No problem! Click 'Restart' anytime to try " + levelNames[newUnlockedLevel] + " level.");
+      alert("No problem! Use the level selector or click Restart to try " + levelNames[newUnlockedLevel] + " level.");
     }
   } else {
     alert("🎉 Amazing work! You've completed all levels for this lesson!");
@@ -493,6 +488,8 @@ btnComplete.addEventListener("click", completeLevel);
 btnHint.addEventListener("click", showHint);
 
 btnRestart.addEventListener("click", async ()=>{
+  // Reset to Basic level
+  setCurrentLevel(lesson.lessonId, 'basic');
   clearProgress(lesson.lessonId);
   stepIndex=0; 
   doneSteps=new Set();
@@ -503,7 +500,6 @@ btnRestart.addEventListener("click", async ()=>{
 (async function init(){
   resizeCanvas();
   requestAnimationFrame(cortexTick);
-
   await loadScratchblocks();
 
   const lessonId=getLessonId();
@@ -516,7 +512,6 @@ btnRestart.addEventListener("click", async ()=>{
     console.error("[CSA] lesson load error", e);
     elTitle.textContent="Lesson load error";
     elStepTitle.textContent="Could not load lesson";
-    elBubble.textContent=`Could not load ${lessonId}.json\n\nFix:\n1) Upload ${lessonId}.json to GitHub root.\n2) Ensure filename matches lessonId exactly.\n3) Hard refresh (Ctrl+Shift+R).`;
-    await renderBlocks("say [Could not load lesson] for (2) seconds");
+    elBubble.textContent=`Could not load ${lessonId}.json`;
   }
 })();

@@ -4,22 +4,135 @@
   "week": "Week 1",
   "title": "Talking Character",
   "steps_basic": [
-    {"title": "Create sprite", "instruction": "Open Scratch, keep or rename the cat to 'Buddy'.", "hint": "Just rename the sprite to Buddy.", "blocks_text": ""},
-    {"title": "Add event", "instruction": "Add 'when this sprite clicked' event.", "hint": "Events → when this sprite clicked", "blocks_text": "when this sprite clicked"},
-    {"title": "Make it talk", "instruction": "Add 'say [Hi! I'm Buddy!] for (2) seconds'.", "hint": "Looks → say", "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds"},
-    {"title": "Test it", "instruction": "Click Buddy. Does it speak? Basic complete!", "hint": "Click the sprite on stage.", "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds"}
+    {
+      "title": "Open Scratch and click Create",
+      "instruction": "Open Scratch and click Create. You should see the Stage and a sprite (cat).",
+      "hint": "If you can't see the cat, refresh Scratch.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Delete or rename the Cat",
+      "instruction": "Delete the Cat sprite (right-click → delete) OR keep it and rename it 'Buddy' (sprite name box).",
+      "hint": "Right-click on the cat sprite and choose delete, or just rename it to Buddy.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Select Buddy sprite",
+      "instruction": "Click Buddy so it is selected (blue outline).",
+      "hint": "Click on the sprite in the sprite list at the bottom right.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Add 'when this sprite clicked' event",
+      "instruction": "Events → drag 'when this sprite clicked' into the coding area.",
+      "hint": "Look in the Events category (yellow blocks).",
+      "blocks_text": "when this sprite clicked"
+    },
+    {
+      "title": "Add say block",
+      "instruction": "Looks → drag 'say [Hi! I'm Buddy!] for (2) seconds' and snap it under the event.",
+      "hint": "Looks category → say [ ] for ( ) seconds block.",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds"
+    },
+    {
+      "title": "Test your character",
+      "instruction": "Click Buddy on the stage to test. Buddy should speak!",
+      "hint": "Click on Buddy in the stage area (big white area on the right).",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds"
+    }
   ],
   "steps_standard": [
-    {"title": "Add costume", "instruction": "Costumes tab → duplicate costume.", "hint": "Make costume2", "blocks_text": ""},
-    {"title": "More messages", "instruction": "Add 3 say blocks total.", "hint": "Stack 3 say blocks", "blocks_text": "when this sprite clicked\nsay [Hi!] for (2) seconds\nsay [How are you?] for (2) seconds\nsay [Bye!] for (2) seconds"},
-    {"title": "Costume change", "instruction": "Insert 'switch costume to costume2' between messages.", "hint": "Put it after first say", "blocks_text": "when this sprite clicked\nsay [Hi!] for (2) seconds\nswitch costume to [costume2 v]\nsay [How are you?] for (2) seconds\nsay [Bye!] for (2) seconds"},
-    {"title": "Add sound", "instruction": "Sounds tab → choose Pop. Add 'start sound Pop' at end.", "hint": "Sound → start sound", "blocks_text": "when this sprite clicked\nsay [Hi!] for (2) seconds\nswitch costume to [costume2 v]\nsay [How are you?] for (2) seconds\nsay [Bye!] for (2) seconds\nstart sound [Pop v]"}
+    {
+      "title": "Do BASIC first",
+      "instruction": "Complete all BASIC steps before starting STANDARD level.",
+      "hint": "Make sure you have the basic talking character working.",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds"
+    },
+    {
+      "title": "Add a second costume",
+      "instruction": "Costumes tab → add/duplicate a second costume (so you have costume1 and costume2).",
+      "hint": "Click Costumes tab, then hover over a costume and click the duplicate icon.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Add more say blocks",
+      "instruction": "Back to Code → add two more 'say [ ] for ( ) seconds' blocks (3 total).",
+      "hint": "Looks → say [ ] for ( ) seconds. Drag it 2 more times.",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds\nsay [How are you?] for (2) seconds\nsay [Nice to see you!] for (2) seconds"
+    },
+    {
+      "title": "Insert costume change",
+      "instruction": "Insert 'switch costume to [costume2]' between message 1 and message 2.",
+      "hint": "Looks → switch costume to. Put it after the first say block.",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds\nswitch costume to [costume2 v]\nsay [How are you?] for (2) seconds\nsay [Nice to see you!] for (2) seconds"
+    },
+    {
+      "title": "Choose a sound",
+      "instruction": "Sounds tab → choose a sound (e.g., Pop).",
+      "hint": "Click Sounds tab → click speaker icon → choose Pop or any sound.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Add sound effect",
+      "instruction": "Sound category → add 'start sound [Pop]' after the last message.",
+      "hint": "Sound category (pink) → start sound [Pop]",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds\nswitch costume to [costume2 v]\nsay [How are you?] for (2) seconds\nsay [Nice to see you!] for (2) seconds\nstart sound [Pop v]"
+    },
+    {
+      "title": "Test all features",
+      "instruction": "Test: click Buddy → message1 → costume change → message2 → message3 → sound.",
+      "hint": "The costume should change and you should hear a sound at the end.",
+      "blocks_text": "when this sprite clicked\nsay [Hi! I'm Buddy!] for (2) seconds\nswitch costume to [costume2 v]\nsay [How are you?] for (2) seconds\nsay [Nice to see you!] for (2) seconds\nstart sound [Pop v]"
+    }
   ],
   "steps_advanced": [
-    {"title": "Create variable", "instruction": "Variables → Make 'message' variable.", "hint": "For all sprites", "blocks_text": ""},
-    {"title": "Random number", "instruction": "Set message to pick random 1 to 3.", "hint": "Operators → pick random", "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))"},
-    {"title": "Ask name", "instruction": "Add 'ask [What is your name?] and wait'.", "hint": "Sensing → ask and wait", "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait"},
-    {"title": "Join answer", "instruction": "Use join [Hello ] (answer) in say block.", "hint": "Operators → join", "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait\nsay (join [Hello ] (answer)) for (2) seconds"},
-    {"title": "Random replies", "instruction": "Add if-then for message=1, 2, 3 with different responses.", "hint": "Control → if-then-else", "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait\nif <(message) = (1)> then\n  say (join [Hello ] (answer)) for (2) seconds\nelse\n  if <(message) = (2)> then\n    say (join [Hi ] (answer)) for (2) seconds\n  else\n    say (join [Hey ] (answer)) for (2) seconds"}
+    {
+      "title": "Do STANDARD first",
+      "instruction": "Complete all STANDARD steps before starting ADVANCED level.",
+      "hint": "You should have costume changes, multiple messages, and sound working.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Make a Variable 'message'",
+      "instruction": "Variables → Make a Variable → name it 'message' (for all sprites).",
+      "hint": "Click Variables category → Make a Variable button.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Set random message",
+      "instruction": "Operators → add 'pick random (1) to (3)'. Variables → 'set [message] to (pick random 1 to 3)' near the top of the script.",
+      "hint": "Put this right after 'when this sprite clicked'.",
+      "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))"
+    },
+    {
+      "title": "Ask for user's name",
+      "instruction": "Sensing → add 'ask [What is your name?] and wait'.",
+      "hint": "Put this after setting the message variable.",
+      "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait"
+    },
+    {
+      "title": "Join name with greeting",
+      "instruction": "Operators → drag 'join [Hello ] (answer)'. Put it into Looks → 'say (join...) for (2) seconds'.",
+      "hint": "Operators → join. Sensing → answer. Combine them.",
+      "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait\nsay (join [Hello ] (answer)) for (2) seconds"
+    },
+    {
+      "title": "Add if-then for message 1",
+      "instruction": "Control → add 'if then' → inside say reply #1.",
+      "hint": "Control → if then. Put your first response inside.",
+      "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait\nif <(message) = (1)> then\n  say (join [Hello ] (answer)) for (2) seconds\n  say [Great to meet you!] for (2) seconds"
+    },
+    {
+      "title": "Add else-if for messages 2 and 3",
+      "instruction": "Add else-if (or nested if) for message=2 and message=3 with different replies.",
+      "hint": "Click + on the if block to add else. Create different responses for each number.",
+      "blocks_text": "when this sprite clicked\nset [message v] to (pick random (1) to (3))\nask [What is your name?] and wait\nif <(message) = (1)> then\n  say (join [Hello ] (answer)) for (2) seconds\n  say [Great to meet you!] for (2) seconds\nelse\n  if <(message) = (2)> then\n    say (join [Hi there, ] (answer)) for (2) seconds\n    say [Welcome!] for (2) seconds\n  else\n    say (join [Hey ] (answer)) for (2) seconds\n    say [Nice name!] for (2) seconds"
+    },
+    {
+      "title": "Test random responses",
+      "instruction": "Test: click Buddy several times—replies should change randomly.",
+      "hint": "Each time you click, the greeting should be different (1, 2, or 3).",
+      "blocks_text": ""
+    }
   ]
 }

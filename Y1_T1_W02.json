@@ -4,21 +4,135 @@
   "week": "Week 2",
   "title": "Guess My Number",
   "steps_basic": [
-    {"title": "Variables", "instruction": "Make variables 'secret' and 'guess'.", "hint": "Variables → Make Variable", "blocks_text": ""},
-    {"title": "Green flag", "instruction": "Add 'when green flag clicked'.", "hint": "Events category", "blocks_text": "when green flag clicked"},
-    {"title": "Random secret", "instruction": "Set secret to pick random 1 to 10.", "hint": "Operators → pick random", "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))"},
-    {"title": "Ask guess", "instruction": "Ask 'Guess 1 to 10' and set guess to answer.", "hint": "Sensing → ask, answer", "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess 1 to 10] and wait\nset [guess v] to (answer)"},
-    {"title": "Check answer", "instruction": "If guess=secret say Correct, else check high/low.", "hint": "Control → if-else, Operators →  =, >", "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess 1 to 10] and wait\nset [guess v] to (answer)\nif <(guess) = (secret)> then\n  say [Correct!] for (2) seconds\nelse\n  if <(guess) > (secret)> then\n    say [Too high!] for (2) seconds\n  else\n    say [Too low!] for (2) seconds"}
+    {
+      "title": "Make variables",
+      "instruction": "Variables → Make variables 'secret' and 'guess' (for all sprites).",
+      "hint": "Click Variables → Make a Variable → type 'secret' → OK. Then make 'guess'.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Add green flag event",
+      "instruction": "Events → add 'when green flag clicked'.",
+      "hint": "Events category (yellow) → when green flag clicked",
+      "blocks_text": "when green flag clicked"
+    },
+    {
+      "title": "Pick random secret number",
+      "instruction": "Variables → set secret to Operators → 'pick random (1) to (10)'.",
+      "hint": "Variables → set [secret] to. Operators → pick random (1) to (10).",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))"
+    },
+    {
+      "title": "Ask for a guess",
+      "instruction": "Sensing → 'ask [Guess a number 1 to 10] and wait'.",
+      "hint": "Sensing category (light blue) → ask [ ] and wait",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess a number 1 to 10] and wait"
+    },
+    {
+      "title": "Store the guess",
+      "instruction": "Variables → set guess to (answer).",
+      "hint": "Variables → set [guess] to. Sensing → answer.",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess a number 1 to 10] and wait\nset [guess v] to (answer)"
+    },
+    {
+      "title": "Check if correct",
+      "instruction": "Control → 'if then' → Looks say 'Correct!' for 2 seconds.",
+      "hint": "Control → if then. Operators → (guess) = (secret)",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess a number 1 to 10] and wait\nset [guess v] to (answer)\nif <(guess) = (secret)> then\n  say [Correct!] for (2) seconds"
+    },
+    {
+      "title": "Add high/low feedback",
+      "instruction": "Else: add another if: if guess > secret say 'Too high!' else say 'Too low!'.",
+      "hint": "Click + on if block to add else. Nest another if inside for high/low.",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nask [Guess a number 1 to 10] and wait\nset [guess v] to (answer)\nif <(guess) = (secret)> then\n  say [Correct!] for (2) seconds\nelse\n  if <(guess) > (secret)> then\n    say [Too high!] for (2) seconds\n  else\n    say [Too low!] for (2) seconds"
+    },
+    {
+      "title": "Test the game",
+      "instruction": "Test: run 3 guesses; confirm feedback changes.",
+      "hint": "Try guessing high, low, and correct to test all paths.",
+      "blocks_text": ""
+    }
   ],
   "steps_standard": [
-    {"title": "Make tries", "instruction": "Create 'tries' variable, set to 5.", "hint": "After setting secret", "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nset [tries v] to (5)"},
-    {"title": "Repeat loop", "instruction": "Wrap ask+check in 'repeat until tries=0 OR guess=secret'.", "hint": "Control → repeat until, Operators → OR", "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nset [tries v] to (5)\nrepeat until <<(tries) = (0)> or <(guess) = (secret)>>\n  ask [Guess 1 to 10] and wait\n  set [guess v] to (answer)\n  if <(guess) = (secret)> then\n    say [Correct!] for (2) seconds\n  else\n    if <(guess) > (secret)> then\n      say [Too high!] for (2) seconds\n    else\n      say [Too low!] for (2) seconds\n    change [tries v] by (-1)"},
-    {"title": "Win/lose", "instruction": "After loop: if guess=secret say Win, else say Game over.", "hint": "Use join to show secret", "blocks_text": "after repeat:\nif <(guess) = (secret)> then\n  say [You win!] for (2) seconds\nelse\n  say (join [Game over. Secret was ] (secret)) for (3) seconds"}
+    {
+      "title": "Do BASIC first",
+      "instruction": "Complete BASIC level before starting STANDARD.",
+      "hint": "You should have the basic guessing game with high/low/correct feedback.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Make 'tries' variable",
+      "instruction": "Variables → Make variable 'tries'. Set tries to (5) at the start (after secret set).",
+      "hint": "Variables → Make a Variable → 'tries'. Set it to 5.",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nset [tries v] to (5)"
+    },
+    {
+      "title": "Add repeat until loop",
+      "instruction": "Wrap the ask+check inside Control → 'repeat until <(tries = 0) OR (guess = secret)>'.",
+      "hint": "Control → repeat until. Operators → ( ) OR ( ). Condition: tries=0 or guess=secret",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nset [tries v] to (5)\nrepeat until <<(tries) = (0)> or <(guess) = (secret)>>\n  ask [Guess a number 1 to 10] and wait\n  set [guess v] to (answer)\n  if <(guess) = (secret)> then\n    say [Correct!] for (2) seconds\n  else\n    if <(guess) > (secret)> then\n      say [Too high!] for (2) seconds\n    else\n      say [Too low!] for (2) seconds"
+    },
+    {
+      "title": "Decrease tries on wrong guess",
+      "instruction": "After each wrong guess: Variables → 'change tries by (-1)'.",
+      "hint": "Put this at the end of the else block (after high/low feedback).",
+      "blocks_text": "when green flag clicked\nset [secret v] to (pick random (1) to (10))\nset [tries v] to (5)\nrepeat until <<(tries) = (0)> or <(guess) = (secret)>>\n  ask [Guess a number 1 to 10] and wait\n  set [guess v] to (answer)\n  if <(guess) = (secret)> then\n    say [Correct!] for (2) seconds\n  else\n    if <(guess) > (secret)> then\n      say [Too high!] for (2) seconds\n    else\n      say [Too low!] for (2) seconds\n    change [tries v] by (-1)"
+    },
+    {
+      "title": "Show win or lose message",
+      "instruction": "After the loop: if guess = secret say 'You win!' else say 'Game over. Secret was (secret)'.",
+      "hint": "Use Operators → join to combine text with secret number.",
+      "blocks_text": "after repeat loop:\nif <(guess) = (secret)> then\n  say [You win!] for (2) seconds\nelse\n  say (join [Game over. Secret was ] (secret)) for (3) seconds"
+    },
+    {
+      "title": "Show tries variable",
+      "instruction": "Show tries variable on stage; test a winning and a losing run.",
+      "hint": "Check the checkbox next to 'tries' in Variables category.",
+      "blocks_text": ""
+    }
   ],
   "steps_advanced": [
-    {"title": "Difficulty", "instruction": "Make 'maxNum' variable. Ask difficulty, set maxNum to 10/50/100.", "hint": "easy=10, medium=50, hard=100", "blocks_text": "when green flag clicked\nask [easy, medium, or hard?] and wait\nif <(answer) = [easy]> then\n  set [maxNum v] to (10)\nif <(answer) = [medium]> then\n  set [maxNum v] to (50)\nif <(answer) = [hard]> then\n  set [maxNum v] to (100)"},
-    {"title": "Use maxNum", "instruction": "Change secret to pick random 1 to maxNum.", "hint": "Replace 10 with maxNum variable", "blocks_text": "set [secret v] to (pick random (1) to (maxNum))"},
-    {"title": "Even/odd hint", "instruction": "When tries=2, say if secret is EVEN or ODD.", "hint": "(secret) mod (2) = 0 means EVEN", "blocks_text": "inside repeat loop:\nif <(tries) = (2)> then\n  if <((secret) mod (2)) = (0)> then\n    say [Hint: EVEN!] for (2) seconds\n  else\n    say [Hint: ODD!] for (2) seconds"},
-    {"title": "Best score", "instruction": "Make bestScore variable. When win, calculate guesses and update if better.", "hint": "guesses = 5 - tries + 1", "blocks_text": "when win:\nset [guesses v] to ((5) - (tries) + (1))\nif <(guesses) < (bestScore)> then\n  set [bestScore v] to (guesses)"}
+    {
+      "title": "Do STANDARD first",
+      "instruction": "Complete STANDARD level before starting ADVANCED.",
+      "hint": "You should have limited tries, win/lose messages, tries counter.",
+      "blocks_text": ""
+    },
+    {
+      "title": "Make 'maxNum' variable",
+      "instruction": "Variables → Make variable 'maxNum'. Ask difficulty: 'easy/medium/hard' and set maxNum to 10/50/100.",
+      "hint": "At the start, ask for difficulty then set maxNum based on answer.",
+      "blocks_text": "when green flag clicked\nask [Choose difficulty: easy, medium, or hard] and wait\nif <(answer) = [easy]> then\n  set [maxNum v] to (10)\nif <(answer) = [medium]> then\n  set [maxNum v] to (50)\nif <(answer) = [hard]> then\n  set [maxNum v] to (100)"
+    },
+    {
+      "title": "Use maxNum for secret",
+      "instruction": "Set secret to pick random 1 to maxNum (replace the old range).",
+      "hint": "Change (10) to (maxNum) variable.",
+      "blocks_text": "set [secret v] to (pick random (1) to (maxNum))"
+    },
+    {
+      "title": "Add even/odd hint",
+      "instruction": "Add hint: when tries = 2, use Operators '(secret mod 2)' to say 'EVEN' or 'ODD'.",
+      "hint": "If (secret) mod (2) = 0 then EVEN, else ODD. Operators → ( ) mod ( )",
+      "blocks_text": "inside repeat loop, after wrong guess:\nif <(tries) = (2)> then\n  if <((secret) mod (2)) = (0)> then\n    say [Hint: It's EVEN!] for (2) seconds\n  else\n    say [Hint: It's ODD!] for (2) seconds"
+    },
+    {
+      "title": "Add best score tracking",
+      "instruction": "Add best score: Make variable bestScore; set bestScore to 999 on green flag.",
+      "hint": "Set to a high number so any real score will beat it.",
+      "blocks_text": "when green flag clicked\nset [bestScore v] to (999)"
+    },
+    {
+      "title": "Update best score on win",
+      "instruction": "When player wins, compute guessCount = startingTries - tries + 1; if guessCount < bestScore then set bestScore.",
+      "hint": "guessCount = how many guesses they used. Update bestScore if they did better.",
+      "blocks_text": "when player wins:\nset [guessCount v] to ((5) - (tries) + (1))\nif <(guessCount) < (bestScore)> then\n  set [bestScore v] to (guessCount)\n  say (join [New best! Only ] (join (bestScore) [ guesses!])) for (3) seconds"
+    },
+    {
+      "title": "Add Restart button (optional)",
+      "instruction": "Add a Restart button sprite: when clicked broadcast RESTART; on receive RESTART reset secret, tries, and messages.",
+      "hint": "New sprite → when clicked → broadcast RESTART. Main sprite → when I receive RESTART → reset all.",
+      "blocks_text": "Restart button sprite:\nwhen this sprite clicked\nbroadcast [RESTART v]\n\nMain sprite:\nwhen I receive [RESTART v]\nset [bestScore v] to (999)\n[run the whole game again]"
+    }
   ]
 }

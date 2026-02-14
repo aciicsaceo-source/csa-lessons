@@ -1,38 +1,27 @@
-# CSA Lesson Player - Complete Edition
+# CSA Lesson Player - Final Version
 
-## What's Fixed
-✅ Text rendering fixed (no more garbled chat)
-✅ Zoom controls for Scratch blocks (±, Reset buttons)
-✅ Auto-zoom to fit tall stacks
-✅ All 4 weeks have 3 levels: Basic, Standard, Advanced
-✅ Progressive unlocking: Complete Basic → unlock Standard → unlock Advanced
-
-## Features
-- **3 Levels per lesson**: Basic (easy), Standard (medium), Advanced (hard)
-- **Auto-progression**: Complete final step → prompt to next level
-- **Zoom controls**: +/- buttons to zoom Scratch blocks, auto-fit for tall stacks
-- **Cortex animation**: Dots from cube centers, stop at bubble, drift together when thinking
-- **Progress tracking**: Saves your level and step progress
-
-## Files Included
-- index.html, app.js, styles.css
-- csa_logo_jelly.jpeg
-- Y1_T1_W01.json - Talking Character (Basic/Standard/Advanced)
-- Y1_T1_W02.json - Guess My Number (Basic/Standard/Advanced)
-- Y1_T1_W03.json - Smart Pet (Basic/Standard/Advanced)
-- Y1_T1_W04.json - Reaction Timer (Basic/Standard/Advanced)
+## New Features
+✅ **Level Selector Dropdown** - Switch between Basic/Standard/Advanced
+✅ **Restart to Basic** - Restart button resets to Basic level
+✅ **Locked Levels** - Standard/Advanced locked until previous level completed
+✅ **Zoom Controls** - +/- buttons, auto-fit for tall Scratch blocks
+✅ **Fixed Text Rendering** - No more garbled chat text
 
 ## How to Use
-1. Upload ALL files to GitHub repository
+1. Upload all files to GitHub
 2. Enable GitHub Pages
-3. Access: `https://yourusername.github.io/repo-name/?lesson=Y1_T1_W01`
+3. Open: `?lesson=Y1_T1_W01`
 
-## Level Progression
-1. Start at Basic level
-2. Navigate through steps with Next →
-3. Final step shows "Complete Level ✓" button
-4. Click it → prompt "Ready for Standard?"
-5. Click OK → loads Standard level automatically
-6. Repeat for Advanced level
+## Level System
+- **Dropdown Selector**: Choose level (locked levels are disabled)
+- **Restart Button**: Always goes back to Basic level
+- **Complete Level**: Unlocks next level + asks if ready
+- **3 Levels**: Basic → Standard → Advanced
 
-Upload and test! All features locked and working.
+## Files
+- index.html, app.js, styles.css
+- csa_logo_jelly.jpeg
+- Y1_T1_W01-04.json (lesson files)
+
+Note: Lesson JSON files need multi-level structure (steps_basic, steps_standard, steps_advanced).
+Current files are abbreviated - replace with full lesson content.
