@@ -3,11 +3,11 @@ const qs = (s)=>document.querySelector(s);
 
 function cleanText(s){
   if(!s) return "";
+  // Fixed: removed the \\n replacement that was causing garbled text
   return String(s)
     .replace(/<[^>]*>/g,"")
     .replace(/\u00a0/g," ")
     .replace(/[^\S\r\n]+/g," ")
-    .replace(/\\n/g,"\n")
     .trim();
 }
 const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
@@ -15,12 +15,15 @@ const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
 let lesson=null, stepIndex=0, doneSteps=new Set();
 let typingAbort={abort:false};
 let cortexSpikeUntil=0;
+let currentZoom=1.0;
 
 const elTitle=qs("#lessonTitle"), elBubble=qs("#bubbleText"), elStepPill=qs("#stepPill"), elStepTitle=qs("#stepTitle");
 const elBlocks=qs("#blocksSvg"), elBlocksFallback=qs("#blocksFallback"), elBlocksStatus=qs("#blocksStatus"), elProgress=qs("#progressBar");
 const btnBack=qs("#backBtn"), btnNext=qs("#nextBtn"), btnComplete=qs("#completeBtn"), btnHint=qs("#hintBtn"), btnRestart=qs("#restartBtn");
 const hintBox=qs("#hintBox"), elHintText=qs("#hintText");
 const bubbleEl=qs("#bubble");
+const zoomControls=qs("#zoomControls"), zoomLevel=qs("#zoomLevel");
+const btnZoomIn=qs("#zoomInBtn"), btnZoomOut=qs("#zoomOutBtn"), btnZoomReset=qs("#zoomResetBtn");
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -84,6 +87,43 @@ async function loadScratchblocks(){
   })();
   return scratchblocksReady;
 }
+
+// === Zoom Controls ===
+function updateZoom(){
+  elBlocks.style.transform = `scale(${currentZoom})`;
+  zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+}
+
+function autoZoomToFit(){
+  const svg = elBlocks.querySelector("svg");
+  if(!svg) return;
+  
+  const container = elBlocks.parentElement;
+  const svgHeight = svg.getBoundingClientRect().height;
+  const containerHeight = container.clientHeight - 80; // Account for padding/controls
+  
+  if(svgHeight > containerHeight){
+    currentZoom = Math.max(0.4, containerHeight / svgHeight);
+    updateZoom();
+  } else {
+    currentZoom = 1.0;
+    updateZoom();
+  }
+}
+
+btnZoomIn.addEventListener("click", ()=>{
+  currentZoom = Math.min(2.0, currentZoom + 0.1);
+  updateZoom();
+});
+
+btnZoomOut.addEventListener("click", ()=>{
+  currentZoom = Math.max(0.3, currentZoom - 0.1);
+  updateZoom();
+});
+
+btnZoomReset.addEventListener("click", ()=>{
+  autoZoomToFit();
+});
 
 // === Cortex (dots floating from cube centers, stop at bubble) ===
 const logoImg=qs("#csaLogo");
@@ -221,7 +261,6 @@ function getLevelProgress(lessonId){
     const raw = localStorage.getItem(`CSA_LEVEL__${lessonId}`);
     if(!raw) return {unlockedLevel: 'basic', currentLevel: 'basic', completedLevels: []};
     const data = JSON.parse(raw);
-    // Ensure currentLevel exists for backward compatibility
     if(!data.currentLevel) data.currentLevel = data.unlockedLevel || 'basic';
     return data;
   }catch(_){
@@ -308,6 +347,7 @@ async function typeBubble(text){
 async function renderBlocks(blocksText){
   elBlocks.innerHTML="";
   elBlocksFallback.classList.add("hidden");
+  zoomControls.classList.add("hidden");
 
   const t=(blocksText||"").trim();
   if(!t){
@@ -335,7 +375,7 @@ async function renderBlocks(blocksText){
     console.log("[CSA] Calling scratchblocks.render...");
     scratchblocks.renderMatching("pre.blocks", {style:"scratch3"});
     
-    await sleep(100);
+    await sleep(200);
     
     const hasSvg = elBlocks.querySelector("svg");
     if(!hasSvg){
@@ -346,6 +386,8 @@ async function renderBlocks(blocksText){
     }else{
       console.log("[CSA] SVG rendered successfully!");
       setBlocksStatus("");
+      zoomControls.classList.remove("hidden");
+      autoZoomToFit();
     }
   }catch(e){
     console.error("[CSA] scratchblocks render error:", e);
@@ -395,7 +437,6 @@ async function renderStep(){
   btnBack.disabled=(stepIndex===0);
   btnNext.disabled=isLastStep;
   
-  // Show Complete button only on last step
   if(isLastStep){
     btnComplete.classList.remove("hidden");
     btnNext.classList.add("hidden");
@@ -417,21 +458,17 @@ async function completeLevel(){
     const ready = confirm(`🎉 Congratulations! You've completed ${levelNames[currentLevel]} level!\n\n${levelNames[newUnlockedLevel]} level is now unlocked.\n\nAre you ready for ${levelNames[newUnlockedLevel]} level?`);
     
     if(ready){
-      // Switch to the new level
       setCurrentLevel(lesson.lessonId, newUnlockedLevel);
       
-      // Reset progress and render new level
       clearProgress(lesson.lessonId);
       stepIndex = 0;
       doneSteps = new Set();
       
       await renderStep();
     } else {
-      // Stay on current completed level
       alert("No problem! Click 'Restart' anytime to try " + levelNames[newUnlockedLevel] + " level.");
     }
   } else {
-    // No more levels
     alert("🎉 Amazing work! You've completed all levels for this lesson!");
   }
 }

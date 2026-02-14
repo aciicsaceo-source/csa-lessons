@@ -3,30 +3,23 @@
   "term": "Term 1",
   "week": "Week 3",
   "title": "Smart Pet",
-  "steps": [
-    {
-      "title": "Choose your pet sprite",
-      "instruction": "Open Scratch and choose a Pet sprite from the sprite library (or keep the cat and rename it 'Pet').",
-      "hint": "Click the sprite icon in the bottom right to add a new sprite from the library.",
-      "blocks_text": ""
-    },
-    {
-      "title": "Add click event",
-      "instruction": "Click on your Pet sprite to select it. Then drag 'when this sprite clicked' from Events into the coding area.",
-      "hint": "Look in the Events category (yellow blocks) for the 'when this sprite clicked' block.",
-      "blocks_text": "when this sprite clicked"
-    },
-    {
-      "title": "Make your pet talk",
-      "instruction": "Add a 'say' block so your pet says 'Hello! I am your pet!' for 2 seconds when clicked.",
-      "hint": "Find the 'say [ ] for ( ) seconds' block in the Looks category (purple).",
-      "blocks_text": "when this sprite clicked\nsay [Hello! I am your pet!] for (2) seconds"
-    },
-    {
-      "title": "Test your pet",
-      "instruction": "Click on your pet sprite on the stage. Does it say hello? If yes, mark this step as Done!",
-      "hint": "Click directly on the pet in the stage area (the big white area on the right).",
-      "blocks_text": "when this sprite clicked\nsay [Hello! I am your pet!] for (2) seconds"
-    }
+  "steps_basic": [
+    {"title": "Choose pet", "instruction": "Choose a Pet sprite or rename cat to Pet.", "hint": "Sprite library", "blocks_text": ""},
+    {"title": "Click event", "instruction": "Add 'when this sprite clicked'.", "hint": "Events", "blocks_text": "when this sprite clicked"},
+    {"title": "Pet talks", "instruction": "Say 'Hello! I am your pet!' for 2 seconds.", "hint": "Looks → say", "blocks_text": "when this sprite clicked\nsay [Hello! I am your pet!] for (2) seconds"}
+  ],
+  "steps_standard": [
+    {"title": "Mood variable", "instruction": "Make 'mood' variable.", "hint": "For all sprites", "blocks_text": ""},
+    {"title": "Happy start", "instruction": "Green flag: set mood to happy, switch to happy costume.", "hint": "May need to add costume", "blocks_text": "when green flag clicked\nset [mood v] to [happy]\nswitch costume to [happy v]"},
+    {"title": "Get hungry", "instruction": "Forever: wait 10s, set mood hungry, switch costume, say hungry.", "hint": "Control → forever", "blocks_text": "when green flag clicked\nset [mood v] to [happy]\nswitch costume to [happy v]\nforever\n  wait (10) seconds\n  set [mood v] to [hungry]\n  switch costume to [hungry v]\n  say [I'm hungry!] for (2) seconds"},
+    {"title": "Food button", "instruction": "Add Food sprite. When clicked, broadcast FEED.", "hint": "New sprite, Events → broadcast", "blocks_text": "when this sprite clicked\nbroadcast [FEED v]"},
+    {"title": "Pet eats", "instruction": "Pet: when receive FEED, set mood happy, switch costume, say Yum.", "hint": "Code on Pet sprite", "blocks_text": "when I receive [FEED v]\nset [mood v] to [happy]\nswitch costume to [happy v]\nsay [Yum!] for (1) seconds"}
+  ],
+  "steps_advanced": [
+    {"title": "Energy variable", "instruction": "Make 'energy' variable. Set to 10 on green flag.", "hint": "At start of pet code", "blocks_text": "when green flag clicked\nset [energy v] to (10)"},
+    {"title": "Energy drains", "instruction": "Forever: wait 5s, change energy by -1.", "hint": "Separate forever loop", "blocks_text": "when green flag clicked\nset [energy v] to (10)\nforever\n  wait (5) seconds\n  change [energy v] by (-1)"},
+    {"title": "Get sleepy", "instruction": "If energy < 3, set mood sleepy, switch costume, say sleepy.", "hint": "Inside energy loop", "blocks_text": "if <(energy) < (3)> then\n  set [mood v] to [sleepy]\n  switch costume to [sleepy v]\n  say [So sleepy...] for (2) seconds"},
+    {"title": "Sleep button", "instruction": "Add Sleep sprite. When clicked, broadcast SLEEP.", "hint": "New sprite", "blocks_text": "when this sprite clicked\nbroadcast [SLEEP v]"},
+    {"title": "Pet sleeps", "instruction": "Pet: when receive SLEEP, set energy 10, mood happy, costume happy.", "hint": "Restore energy", "blocks_text": "when I receive [SLEEP v]\nset [energy v] to (10)\nset [mood v] to [happy]\nswitch costume to [happy v]"}
   ]
 }
