@@ -239,15 +239,24 @@ function saveLevelProgress(lessonId, unlockedLevel, currentLevel, completedLevel
 
 function unlockNextLevel(lessonId, completedLevel){
   const levelProgress = getLevelProgress(lessonId);
+  
+  // Add to completed levels if not already there
   if(!levelProgress.completedLevels.includes(completedLevel)){
     levelProgress.completedLevels.push(completedLevel);
   }
+  
+  // Determine new unlocked level based on what was just completed
   let newUnlockedLevel = levelProgress.unlockedLevel;
-  if(completedLevel === 'basic' && levelProgress.unlockedLevel === 'basic'){
+  
+  if(completedLevel === 'basic'){
+    // Just completed Basic → unlock Standard
     newUnlockedLevel = 'standard';
-  } else if(completedLevel === 'standard' && levelProgress.unlockedLevel === 'standard'){
+  } else if(completedLevel === 'standard'){
+    // Just completed Standard → unlock Advanced
     newUnlockedLevel = 'advanced';
   }
+  // If completed Advanced, newUnlockedLevel stays 'advanced'
+  
   saveLevelProgress(lessonId, newUnlockedLevel, levelProgress.currentLevel, levelProgress.completedLevels);
   return newUnlockedLevel;
 }
