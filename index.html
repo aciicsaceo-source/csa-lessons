@@ -21,7 +21,7 @@
           <option value="advanced">Advanced</option>
         </select>
         <a class="btn" target="_blank" rel="noopener" href="https://scratch.mit.edu/projects/editor/">Open Scratch</a>
-        <button id="restartBtn" class="btn secondary" type="button">Restart</button>
+        <button id="restartBtn" class="btn secondary" type="button">Restart Level</button>
       </div>
     </header>
 
@@ -52,16 +52,18 @@
           </div>
 
           <div class="step-body">
-            <div class="visual">
+            <div class="visual-container">
               <div class="zoom-controls hidden" id="zoomControls">
                 <button id="zoomOutBtn" class="zoom-btn" type="button">−</button>
                 <span id="zoomLevel">100%</span>
                 <button id="zoomInBtn" class="zoom-btn" type="button">+</button>
-                <button id="zoomResetBtn" class="zoom-btn-reset" type="button">Reset</button>
+                <button id="zoomResetBtn" class="zoom-btn-reset" type="button">Fit</button>
               </div>
-              <div id="blocksSvg" class="blocks"></div>
-              <div id="blocksStatus" class="blocks-status hidden"></div>
-              <div id="blocksFallback" class="blocks-fallback hidden"></div>
+              <div class="visual-scroll">
+                <div id="blocksSvg" class="blocks"></div>
+                <div id="blocksStatus" class="blocks-status hidden"></div>
+                <div id="blocksFallback" class="blocks-fallback hidden"></div>
+              </div>
             </div>
 
             <div id="hintBox" class="hintbox hidden" aria-live="polite">
@@ -79,10 +81,6 @@
               <button id="nextBtn" class="btn primary" type="button">Next →</button>
             </div>
           </div>
-        </div>
-
-        <div class="footer-note">
-          Wix gating: each week embeds <code>?lesson=Y1_T1_W01</code>, etc. Wix controls unlock.
         </div>
       </section>
     </main>

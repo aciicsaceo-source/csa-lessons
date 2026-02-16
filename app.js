@@ -99,16 +99,17 @@ function autoZoomToFit(){
   if(!svg) return;
   
   const container = elBlocks.parentElement;
+  const svgWidth = svg.getBoundingClientRect().width;
   const svgHeight = svg.getBoundingClientRect().height;
-  const containerHeight = container.clientHeight - 80;
+  const containerWidth = container.clientWidth - 32;
+  const containerHeight = container.clientHeight - 32;
   
-  if(svgHeight > containerHeight){
-    currentZoom = Math.max(0.4, containerHeight / svgHeight);
-    updateZoom();
-  } else {
-    currentZoom = 1.0;
-    updateZoom();
-  }
+  const scaleW = containerWidth / svgWidth;
+  const scaleH = containerHeight / svgHeight;
+  const fitScale = Math.min(scaleW, scaleH, 1.0);
+  
+  currentZoom = Math.max(0.3, fitScale);
+  updateZoom();
 }
 
 btnZoomIn.addEventListener("click", ()=>{
@@ -240,22 +241,17 @@ function saveLevelProgress(lessonId, unlockedLevel, currentLevel, completedLevel
 function unlockNextLevel(lessonId, completedLevel){
   const levelProgress = getLevelProgress(lessonId);
   
-  // Add to completed levels if not already there
   if(!levelProgress.completedLevels.includes(completedLevel)){
     levelProgress.completedLevels.push(completedLevel);
   }
   
-  // Determine new unlocked level based on what was just completed
   let newUnlockedLevel = levelProgress.unlockedLevel;
   
   if(completedLevel === 'basic'){
-    // Just completed Basic → unlock Standard
     newUnlockedLevel = 'standard';
   } else if(completedLevel === 'standard'){
-    // Just completed Standard → unlock Advanced
     newUnlockedLevel = 'advanced';
   }
-  // If completed Advanced, newUnlockedLevel stays 'advanced'
   
   saveLevelProgress(lessonId, newUnlockedLevel, levelProgress.currentLevel, levelProgress.completedLevels);
   return newUnlockedLevel;
@@ -283,7 +279,6 @@ function getCurrentSteps(lesson){
 function updateLevelSelector(){
   const levelProgress = getLevelProgress(lesson.lessonId);
   
-  // Enable/disable options based on unlocked levels
   Array.from(levelSelector.options).forEach(option => {
     const level = option.value;
     if(level === 'basic'){
@@ -295,16 +290,13 @@ function updateLevelSelector(){
     }
   });
   
-  // Set current selection
   levelSelector.value = levelProgress.currentLevel;
 }
 
-// Level selector change handler
 levelSelector.addEventListener('change', async ()=>{
   const selectedLevel = levelSelector.value;
   const levelProgress = getLevelProgress(lesson.lessonId);
   
-  // Check if level is unlocked
   if(selectedLevel === 'standard' && levelProgress.unlockedLevel === 'basic'){
     alert('Standard level is locked. Complete Basic level first!');
     levelSelector.value = levelProgress.currentLevel;
@@ -316,7 +308,6 @@ levelSelector.addEventListener('change', async ()=>{
     return;
   }
   
-  // Switch to selected level
   setCurrentLevel(lesson.lessonId, selectedLevel);
   clearProgress(lesson.lessonId);
   stepIndex = 0;
@@ -357,12 +348,51 @@ async function typeBubble(text){
   }
 }
 
-async function renderBlocks(blocksText){
+// Check if step is about making variables and add variable blocks
+function getVariableBlocks(instruction, hint){
+  const text = (instruction + " " + hint).toLowerCase();
+  const variables = [];
+  
+  // Detect variable creation mentions
+  if(text.includes("make a variable") || text.includes("make variable") || text.includes("create variable")){
+    // Extract variable names
+    const patterns = [
+      /variable[s]?\s+['"']([^'"']+)['"']/gi,
+      /named?\s+['"']([^'"']+)['"']/gi,
+      /called?\s+['"']([^'"']+)['"']/gi
+    ];
+    
+    for(const pattern of patterns){
+      let match;
+      while((match = pattern.exec(text)) !== null){
+        const varName = match[1];
+        if(!variables.includes(varName)){
+          variables.push(varName);
+        }
+      }
+    }
+  }
+  
+  if(variables.length > 0){
+    return variables.map(v => `(${v})`).join("\n");
+  }
+  return null;
+}
+
+async function renderBlocks(blocksText, instruction, hint){
   elBlocks.innerHTML="";
   elBlocksFallback.classList.add("hidden");
   zoomControls.classList.add("hidden");
 
-  const t=(blocksText||"").trim();
+  // Check if we need to show variable blocks
+  const varBlocks = getVariableBlocks(instruction, hint);
+  let displayText = blocksText || "";
+  
+  if(varBlocks && !displayText.trim()){
+    displayText = varBlocks;
+  }
+
+  const t = displayText.trim();
   if(!t){
     elBlocksFallback.textContent="No blocks needed for this step.";
     elBlocksFallback.classList.remove("hidden");
@@ -436,7 +466,7 @@ async function renderStep(){
   await typeBubble(step.instruction);
 
   const blocks = step.blocks_text ?? step.blocks ?? step.scratchblocks ?? step.blockText ?? "";
-  await renderBlocks(blocks);
+  await renderBlocks(blocks, step.instruction, step.hint);
 
   setProgress();
   updateLevelSelector();
@@ -470,7 +500,7 @@ async function completeLevel(){
       doneSteps = new Set();
       await renderStep();
     } else {
-      alert("No problem! Use the level selector or click Restart to try " + levelNames[newUnlockedLevel] + " level.");
+      alert("No problem! Use the level selector or click 'Restart Level' to try " + levelNames[newUnlockedLevel] + " level.");
     }
   } else {
     alert("🎉 Amazing work! You've completed all levels for this lesson!");
@@ -496,9 +526,9 @@ btnNext.addEventListener("click", async ()=>{
 btnComplete.addEventListener("click", completeLevel);
 btnHint.addEventListener("click", showHint);
 
+// FIX #2: Restart button goes to current level Step 1 (not back to Basic)
 btnRestart.addEventListener("click", async ()=>{
-  // Reset to Basic level
-  setCurrentLevel(lesson.lessonId, 'basic');
+  // Stay on current level, just reset to step 1
   clearProgress(lesson.lessonId);
   stepIndex=0; 
   doneSteps=new Set();
