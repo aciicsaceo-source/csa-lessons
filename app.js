@@ -145,8 +145,9 @@ const particles=[];
 let lastEmit=0;
 
 const CM_TO_PX = 37.8;
-const CUBE_CENTERS = { left: 0.33, mid: 0.50, right: 0.67 };
-const CUBE_OFFSETS = { left: 0, mid: 0, right: 0 };  // Reset to center - no shift
+// Adjusted to actual cube center positions in the logo image
+const CUBE_CENTERS = { left: 0.28, mid: 0.50, right: 0.72 };
+const CUBE_OFFSETS = { left: 0, mid: 0, right: 0 };
 const EMIT_Y_RATIO = 0.30;
 const EMIT_IDLE_MS = 200;
 const EMIT_ACTIVE_MS = 40;
