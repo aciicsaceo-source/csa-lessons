@@ -24,6 +24,7 @@ const bubbleEl=qs("#bubble");
 const zoomControls=qs("#zoomControls"), zoomLevel=qs("#zoomLevel");
 const btnZoomIn=qs("#zoomInBtn"), btnZoomOut=qs("#zoomOutBtn"), btnZoomReset=qs("#zoomResetBtn");
 const levelSelector=qs("#levelSelector");
+const eyesContainer=qs("#eyesContainer");
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -449,7 +450,25 @@ function showHint(){
   hintBox.classList.remove("hidden");
 }
 
-function spike(){ cortexSpikeUntil=performance.now()+1600; }
+function spike(){ 
+  cortexSpikeUntil=performance.now()+1600; 
+  setEyesThinking();
+}
+
+// Eyes animation control
+function setEyesHappy(){
+  eyesContainer.className = 'eyes-container happy';
+}
+
+function setEyesThinking(){
+  eyesContainer.className = 'eyes-container thinking';
+  // Return to happy after thinking animation
+  setTimeout(()=>{
+    if(performance.now() >= cortexSpikeUntil){
+      setEyesHappy();
+    }
+  }, 1600);
+}
 
 async function renderStep(){
   const currentData = getCurrentSteps(lesson);
@@ -540,6 +559,10 @@ btnRestart.addEventListener("click", async ()=>{
 (async function init(){
   resizeCanvas();
   requestAnimationFrame(cortexTick);
+  
+  // Initialize eyes as happy
+  setEyesHappy();
+  
   await loadScratchblocks();
 
   const lessonId=getLessonId();

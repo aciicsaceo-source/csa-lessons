@@ -35,6 +35,28 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-ser
 .companion{margin-top:240px;height:340px;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:2}
 .logo-wrap{position:relative;width:min(560px, 100%);background:transparent;padding:0;display:flex;align-items:center;justify-content:center}
 .csa-logo{width:100%;height:auto;display:block}
+
+/* Animated Eyes on Yellow Cube */
+.eyes-container{position:absolute;top:28%;left:50%;transform:translateX(-50%);width:80px;height:40px;z-index:5;pointer-events:none}
+.eye{position:absolute;width:32px;height:32px;background:#fff;border-radius:50%;border:3px solid #2a2a2a;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease}
+.left-eye{left:0}
+.right-eye{right:0}
+.pupil{width:14px;height:14px;background:#2a2a2a;border-radius:50%;transition:all 0.3s ease;position:relative}
+
+/* Happy eyes - default state */
+.eyes-container.happy .eye{height:28px;border-radius:50%}
+.eyes-container.happy .pupil{width:12px;height:12px}
+
+/* Thinking eyes - narrow/focused */
+.eyes-container.thinking .eye{height:18px;border-radius:40%}
+.eyes-container.thinking .pupil{width:10px;height:10px;animation:think-dart 1.5s infinite}
+
+@keyframes think-dart{
+  0%, 100%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  75%{transform:translateX(4px)}
+}
+
 .cortex{position:absolute;inset:0;pointer-events:none;z-index:10}
 
 .progress-wrap{height:12px;background:#eef4ff;border-radius:999px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
