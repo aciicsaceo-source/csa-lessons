@@ -32,7 +32,7 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-ser
 .bubble:after{content:"";position:absolute;left:32px;bottom:-18px;width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:18px solid #2f6aa7;}
 .bubble:before{content:"";position:absolute;left:35px;bottom:-14px;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:14px solid #ffffff;z-index:2;}
 .bubble-text{font-size:16px;line-height:1.35;min-height:56px;white-space:pre-wrap}
-.companion{margin-top:240px;height:340px;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:2;flex-direction:column}
+.companion{margin-top:240px;height:420px;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:2;flex-direction:column}
 .logo-wrap{position:relative;width:min(560px, 100%);background:transparent;padding:0;display:flex;align-items:center;justify-content:center}
 .csa-logo{width:100%;height:auto;display:block}
 
@@ -58,11 +58,11 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-ser
 }
 
 /* Bubble Blob Rewards with Physics */
-.bubble-rewards{position:relative;width:100%;height:80px;margin-top:10px;padding:0 20px;overflow:hidden;border:2px solid transparent;border-radius:12px}
+.bubble-rewards{position:relative;width:100%;height:100px;margin-top:10px;padding:0 20px;overflow:hidden;background:rgba(240,248,255,0.5);border:2px dashed #cfe6ff;border-radius:12px}
 
 .ball-counter{position:absolute;top:5px;right:20px;background:rgba(255,255,255,0.95);border:2px solid #2a2a2a;border-radius:20px;padding:4px 12px;font-weight:800;font-size:14px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 
-.bubble-blob{width:40px;height:40px;border-radius:50%;position:absolute;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:none}
+.bubble-blob{width:40px;height:40px;border-radius:50%;position:absolute;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:none;z-index:10}
 
 .cortex{position:absolute;inset:0;pointer-events:none;z-index:10}
 
