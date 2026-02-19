@@ -576,6 +576,7 @@ function updateBallCounter(){
 }
 
 function spawnBubbleBlob(){
+  console.log('[CSA] Spawning bubble blob...');
   const colors = ['#ff3b30', '#ffb020', '#1e86ff'];
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
   
@@ -587,6 +588,7 @@ function spawnBubbleBlob(){
   blob.style.bottom = '0px';
   
   bubbleRewards.appendChild(blob);
+  console.log('[CSA] Blob added to DOM, total balls:', balls.length + 1);
   
   // Physics object
   const ball = {
@@ -602,10 +604,12 @@ function spawnBubbleBlob(){
   };
   
   balls.push(ball);
+  console.log('[CSA] Ball physics initialized:', ball);
   updateBallCounter();
   
   // Start physics if not running
   if(!physicsInterval){
+    console.log('[CSA] Starting physics engine...');
     physicsInterval = setInterval(updatePhysics, 1000/60);
   }
 }
@@ -770,17 +774,22 @@ async function renderStep(){
 }
 
 async function completeLevel(){
+  console.log('[CSA] Complete level clicked');
   const currentData = getCurrentSteps(lesson);
   const currentLevel = currentData.level;
   const newUnlockedLevel = unlockNextLevel(lesson.lessonId, currentLevel);
   spike();
   
   // Spawn bubble blob reward - ONLY ONCE per level completion
+  console.log('[CSA] levelCompletedThisSession:', levelCompletedThisSession);
   if(!levelCompletedThisSession){
     levelCompletedThisSession = true;
+    console.log('[CSA] Scheduling blob spawn in 300ms...');
     setTimeout(()=>{
       spawnBubbleBlob();
     }, 300);
+  } else {
+    console.log('[CSA] Level already completed this session, skipping blob spawn');
   }
   
   if(newUnlockedLevel !== currentLevel){
