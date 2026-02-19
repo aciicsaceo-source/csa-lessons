@@ -26,10 +26,16 @@ const btnZoomIn=qs("#zoomInBtn"), btnZoomOut=qs("#zoomOutBtn"), btnZoomReset=qs(
 const levelSelector=qs("#levelSelector");
 const eyesContainer=qs("#eyesContainer");
 const bubbleRewards=qs("#bubbleRewards");
+const ballCounter=qs("#ballCounter");
 
 // Audio context for bubbling sound
 let audioContext = null;
 let bubblingInterval = null;
+
+// Physics engine for bouncing balls
+let balls = [];
+let physicsInterval = null;
+let levelCompletedThisSession = false;
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -120,6 +126,45 @@ function playBubbleSound(){
   
   oscillator.start(audioContext.currentTime);
   oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+// Boink sound for wall/floor bounce
+function playBoinkSound(velocity){
+  if(!audioContext) return;
+  
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  
+  const volume = Math.min(0.15, Math.abs(velocity) * 0.02);
+  const freq = 150 + Math.abs(velocity) * 10;
+  
+  osc.frequency.value = freq;
+  osc.type = 'triangle';
+  gain.gain.setValueAtTime(volume, audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+  
+  osc.start(audioContext.currentTime);
+  osc.stop(audioContext.currentTime + 0.1);
+}
+
+// Bubble collision sound
+function playBubbleCollisionSound(){
+  if(!audioContext) return;
+  
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  
+  osc.frequency.value = 400 + Math.random() * 200;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+  
+  osc.start(audioContext.currentTime);
+  osc.stop(audioContext.currentTime + 0.15);
 }
 
 function startBubblingSound(){
@@ -525,7 +570,11 @@ function setEyesThinking(){
   }, 1600);
 }
 
-// Bubble blob reward system
+// Bubble blob reward system with PHYSICS
+function updateBallCounter(){
+  ballCounter.textContent = `🎈 ${balls.length}`;
+}
+
 function spawnBubbleBlob(){
   const colors = ['#ff3b30', '#ffb020', '#1e86ff'];
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -534,24 +583,156 @@ function spawnBubbleBlob(){
   blob.className = 'bubble-blob';
   blob.style.background = randomColor;
   blob.style.boxShadow = `0 4px 12px ${randomColor}66`;
-  
-  const existingBlobs = bubbleRewards.querySelectorAll('.bubble-blob').length;
-  const finalX = existingBlobs * 48;
-  blob.style.setProperty('--final-x', `${finalX}px`);
+  blob.style.left = '0px';
+  blob.style.bottom = '0px';
   
   bubbleRewards.appendChild(blob);
   
-  // Play celebration sound
-  if(audioContext){
-    const osc = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    osc.connect(gain);
-    gain.connect(audioContext.destination);
-    osc.frequency.value = 400;
-    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-    osc.start(audioContext.currentTime);
-    osc.stop(audioContext.currentTime + 0.3);
+  // Physics object
+  const ball = {
+    element: blob,
+    x: 20,
+    y: bubbleRewards.clientHeight - 40,
+    vx: 15 + Math.random() * 5,  // Fast horizontal velocity
+    vy: -8 - Math.random() * 4,  // Initial upward velocity
+    radius: 20,
+    color: randomColor,
+    mass: 1,
+    restitution: 0.7  // Bounciness
+  };
+  
+  balls.push(ball);
+  updateBallCounter();
+  
+  // Start physics if not running
+  if(!physicsInterval){
+    physicsInterval = setInterval(updatePhysics, 1000/60);
+  }
+}
+
+function updatePhysics(){
+  const container = bubbleRewards.getBoundingClientRect();
+  const width = container.width - 40;
+  const height = container.height - 40;
+  const gravity = 0.5;
+  const damping = 0.99;
+  
+  // Update each ball
+  for(let i = 0; i < balls.length; i++){
+    const ball = balls[i];
+    
+    // Apply gravity
+    ball.vy += gravity;
+    
+    // Apply velocity
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    
+    // Apply damping
+    ball.vx *= damping;
+    ball.vy *= damping;
+    
+    // Floor collision
+    if(ball.y >= height){
+      ball.y = height;
+      ball.vy = -ball.vy * ball.restitution;
+      if(Math.abs(ball.vy) > 2){
+        playBoinkSound(ball.vy);
+      }
+    }
+    
+    // Ceiling collision
+    if(ball.y <= 0){
+      ball.y = 0;
+      ball.vy = -ball.vy * ball.restitution;
+      playBoinkSound(ball.vy);
+    }
+    
+    // Right wall collision
+    if(ball.x >= width){
+      ball.x = width;
+      ball.vx = -ball.vx * ball.restitution;
+      playBoinkSound(ball.vx);
+    }
+    
+    // Left wall collision
+    if(ball.x <= 0){
+      ball.x = 0;
+      ball.vx = -ball.vx * ball.restitution;
+      playBoinkSound(ball.vx);
+    }
+    
+    // Ball-to-ball collisions
+    for(let j = i + 1; j < balls.length; j++){
+      const other = balls[j];
+      const dx = other.x - ball.x;
+      const dy = other.y - ball.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const minDist = ball.radius + other.radius;
+      
+      if(distance < minDist){
+        // Collision detected
+        playBubbleCollisionSound();
+        
+        // Separate balls
+        const angle = Math.atan2(dy, dx);
+        const targetX = ball.x + Math.cos(angle) * minDist;
+        const targetY = ball.y + Math.sin(angle) * minDist;
+        const ax = (targetX - other.x) * 0.5;
+        const ay = (targetY - other.y) * 0.5;
+        
+        ball.x -= ax;
+        ball.y -= ay;
+        other.x += ax;
+        other.y += ay;
+        
+        // Elastic collision
+        const normalX = dx / distance;
+        const normalY = dy / distance;
+        const relVelX = other.vx - ball.vx;
+        const relVelY = other.vy - ball.vy;
+        const speed = relVelX * normalX + relVelY * normalY;
+        
+        if(speed < 0) continue;
+        
+        const impulse = 2 * speed / (ball.mass + other.mass);
+        ball.vx += impulse * other.mass * normalX;
+        ball.vy += impulse * other.mass * normalY;
+        other.vx -= impulse * ball.mass * normalX;
+        other.vy -= impulse * ball.mass * normalY;
+      }
+    }
+    
+    // Update DOM position
+    ball.element.style.left = `${ball.x}px`;
+    ball.element.style.bottom = `${ball.y}px`;
+    
+    // Stop physics if all balls are settled
+    if(Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1 && Math.abs(ball.y - height) < 2){
+      ball.vx = 0;
+      ball.vy = 0;
+      ball.y = height;
+    }
+  }
+  
+  // Stop physics if all balls are at rest
+  const allAtRest = balls.every(b => 
+    Math.abs(b.vx) < 0.1 && Math.abs(b.vy) < 0.1 && Math.abs(b.y - height) < 2
+  );
+  
+  if(allAtRest && balls.length > 0){
+    clearInterval(physicsInterval);
+    physicsInterval = null;
+  }
+}
+
+function clearAllBalls(){
+  balls.forEach(ball => ball.element.remove());
+  balls = [];
+  updateBallCounter();
+  if(physicsInterval){
+    clearInterval(physicsInterval);
+    physicsInterval = null;
   }
 }
 
@@ -594,10 +775,13 @@ async function completeLevel(){
   const newUnlockedLevel = unlockNextLevel(lesson.lessonId, currentLevel);
   spike();
   
-  // Spawn bubble blob reward!
-  setTimeout(()=>{
-    spawnBubbleBlob();
-  }, 300);
+  // Spawn bubble blob reward - ONLY ONCE per level completion
+  if(!levelCompletedThisSession){
+    levelCompletedThisSession = true;
+    setTimeout(()=>{
+      spawnBubbleBlob();
+    }, 300);
+  }
   
   if(newUnlockedLevel !== currentLevel){
     const levelNames = {basic: 'Basic', standard: 'Standard', advanced: 'Advanced'};
@@ -608,6 +792,7 @@ async function completeLevel(){
       clearProgress(lesson.lessonId);
       stepIndex = 0;
       doneSteps = new Set();
+      levelCompletedThisSession = false;  // Reset for next level
       await renderStep();
     } else {
       alert("No problem! Use the level selector or click 'Restart Level' to try " + levelNames[newUnlockedLevel] + " level.");
@@ -638,10 +823,14 @@ btnHint.addEventListener("click", showHint);
 
 // FIX #2: Restart button goes to current level Step 1 (not back to Basic)
 btnRestart.addEventListener("click", async ()=>{
+  // Clear all reward balls on restart
+  clearAllBalls();
+  
   // Stay on current level, just reset to step 1
   clearProgress(lesson.lessonId);
   stepIndex=0; 
   doneSteps=new Set();
+  levelCompletedThisSession = false;
   spike();
   await renderStep();
 });
@@ -652,6 +841,9 @@ btnRestart.addEventListener("click", async ()=>{
   
   // Initialize eyes as happy
   setEyesHappy();
+  
+  // Initialize ball counter
+  updateBallCounter();
   
   await loadScratchblocks();
 
