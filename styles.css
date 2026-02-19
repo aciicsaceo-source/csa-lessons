@@ -32,29 +32,44 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-ser
 .bubble:after{content:"";position:absolute;left:32px;bottom:-18px;width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:18px solid #2f6aa7;}
 .bubble:before{content:"";position:absolute;left:35px;bottom:-14px;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:14px solid #ffffff;z-index:2;}
 .bubble-text{font-size:16px;line-height:1.35;min-height:56px;white-space:pre-wrap}
-.companion{margin-top:240px;height:340px;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:2}
+.companion{margin-top:240px;height:340px;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:2;flex-direction:column}
 .logo-wrap{position:relative;width:min(560px, 100%);background:transparent;padding:0;display:flex;align-items:center;justify-content:center}
 .csa-logo{width:100%;height:auto;display:block}
 
-/* Animated Eyes on Yellow Cube */
-.eyes-container{position:absolute;top:28%;left:50%;transform:translateX(-50%);width:80px;height:40px;z-index:5;pointer-events:none}
-.eye{position:absolute;width:32px;height:32px;background:#fff;border-radius:50%;border:3px solid #2a2a2a;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease}
+/* Animated Eyes on Yellow Cube - 70% BIGGER */
+.eyes-container{position:absolute;top:28%;left:50%;transform:translateX(-50%);width:136px;height:68px;z-index:5;pointer-events:none}
+.eye{position:absolute;width:54px;height:54px;background:#fff;border-radius:50%;border:5px solid #2a2a2a;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease}
 .left-eye{left:0}
 .right-eye{right:0}
-.pupil{width:14px;height:14px;background:#2a2a2a;border-radius:50%;transition:all 0.3s ease;position:relative}
+.pupil{width:24px;height:24px;background:#2a2a2a;border-radius:50%;transition:all 0.3s ease;position:relative}
 
 /* Happy eyes - default state */
-.eyes-container.happy .eye{height:28px;border-radius:50%}
-.eyes-container.happy .pupil{width:12px;height:12px}
+.eyes-container.happy .eye{height:48px;border-radius:50%}
+.eyes-container.happy .pupil{width:20px;height:20px}
 
 /* Thinking eyes - narrow/focused */
-.eyes-container.thinking .eye{height:18px;border-radius:40%}
-.eyes-container.thinking .pupil{width:10px;height:10px;animation:think-dart 1.5s infinite}
+.eyes-container.thinking .eye{height:31px;border-radius:40%}
+.eyes-container.thinking .pupil{width:17px;height:17px;animation:think-dart 1.5s infinite}
 
 @keyframes think-dart{
   0%, 100%{transform:translateX(0)}
-  25%{transform:translateX(-4px)}
-  75%{transform:translateX(4px)}
+  25%{transform:translateX(-7px)}
+  75%{transform:translateX(7px)}
+}
+
+/* Bubble Blob Rewards */
+.bubble-rewards{position:relative;width:100%;height:60px;margin-top:10px;display:flex;gap:8px;padding:0 20px;align-items:center;justify-content:flex-start}
+
+.bubble-blob{width:40px;height:40px;border-radius:50%;position:relative;animation:blob-bounce 2s ease-out forwards}
+
+@keyframes blob-bounce{
+  0%{transform:translateX(0) scale(1);opacity:1}
+  20%{transform:translateX(100px) scale(1)}
+  40%{transform:translateX(200px) scale(1)}
+  50%{transform:translateX(calc(100% - 60px)) scale(0.85, 1.1);opacity:1}
+  60%{transform:translateX(calc(100% - 80px)) scale(1.05, 0.95)}
+  70%{transform:translateX(calc(100% - 70px)) scale(1)}
+  100%{transform:translateX(calc(var(--final-x, 0px))) scale(1);opacity:1}
 }
 
 .cortex{position:absolute;inset:0;pointer-events:none;z-index:10}

@@ -25,6 +25,11 @@ const zoomControls=qs("#zoomControls"), zoomLevel=qs("#zoomLevel");
 const btnZoomIn=qs("#zoomInBtn"), btnZoomOut=qs("#zoomOutBtn"), btnZoomReset=qs("#zoomResetBtn");
 const levelSelector=qs("#levelSelector");
 const eyesContainer=qs("#eyesContainer");
+const bubbleRewards=qs("#bubbleRewards");
+
+// Audio context for bubbling sound
+let audioContext = null;
+let bubblingInterval = null;
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -93,6 +98,42 @@ async function loadScratchblocks(){
 function updateZoom(){
   elBlocks.style.transform = `scale(${currentZoom})`;
   zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+}
+
+// Bubbling sound generator
+function playBubbleSound(){
+  if(!audioContext){
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.value = 300 + Math.random() * 200;
+  oscillator.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+function startBubblingSound(){
+  if(bubblingInterval) return;
+  bubblingInterval = setInterval(()=>{
+    playBubbleSound();
+  }, 150 + Math.random() * 100);
+}
+
+function stopBubblingSound(){
+  if(bubblingInterval){
+    clearInterval(bubblingInterval);
+    bubblingInterval = null;
+  }
 }
 
 function autoZoomToFit(){
@@ -182,13 +223,22 @@ function emit(){
   const midX   = left + w * CUBE_CENTERS.mid + CUBE_OFFSETS.mid;
   const rightX = left + w * CUBE_CENTERS.right + CUBE_OFFSETS.right;
 
+  // IDLE: Slow particles ONLY when NOT thinking
   if(!active){
     spawnDot(leftX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.red, 0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
     spawnDot(midX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.amber, 0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
     spawnDot(rightX + (Math.random()-0.5)*6, originY + Math.random()*3, PAL.blue, 0.3+Math.random()*0.2, 0.25+Math.random()*0.15, 2+Math.random()*2, 0);
   }
 
+  // THINKING: Fast burst particles - REMOVE OLD IDLE PARTICLES
   if(active){
+    // Clear all idle particles when thinking starts
+    for(let i=particles.length-1; i>=0; i--){
+      if(particles[i].vy < 1.0){ // idle particles have slow speed
+        particles.splice(i, 1);
+      }
+    }
+    
     const burstCount = 15;
     for(let i=0;i<burstCount;i++){
       const r = Math.random();
@@ -453,6 +503,12 @@ function showHint(){
 function spike(){ 
   cortexSpikeUntil=performance.now()+1600; 
   setEyesThinking();
+  startBubblingSound();
+  
+  // Stop bubbling after thinking ends
+  setTimeout(()=>{
+    stopBubblingSound();
+  }, 1600);
 }
 
 // Eyes animation control
@@ -462,12 +518,41 @@ function setEyesHappy(){
 
 function setEyesThinking(){
   eyesContainer.className = 'eyes-container thinking';
-  // Return to happy after thinking animation
   setTimeout(()=>{
     if(performance.now() >= cortexSpikeUntil){
       setEyesHappy();
     }
   }, 1600);
+}
+
+// Bubble blob reward system
+function spawnBubbleBlob(){
+  const colors = ['#ff3b30', '#ffb020', '#1e86ff'];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  
+  const blob = document.createElement('div');
+  blob.className = 'bubble-blob';
+  blob.style.background = randomColor;
+  blob.style.boxShadow = `0 4px 12px ${randomColor}66`;
+  
+  const existingBlobs = bubbleRewards.querySelectorAll('.bubble-blob').length;
+  const finalX = existingBlobs * 48;
+  blob.style.setProperty('--final-x', `${finalX}px`);
+  
+  bubbleRewards.appendChild(blob);
+  
+  // Play celebration sound
+  if(audioContext){
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.frequency.value = 400;
+    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    osc.start(audioContext.currentTime);
+    osc.stop(audioContext.currentTime + 0.3);
+  }
 }
 
 async function renderStep(){
@@ -508,6 +593,11 @@ async function completeLevel(){
   const currentLevel = currentData.level;
   const newUnlockedLevel = unlockNextLevel(lesson.lessonId, currentLevel);
   spike();
+  
+  // Spawn bubble blob reward!
+  setTimeout(()=>{
+    spawnBubbleBlob();
+  }, 300);
   
   if(newUnlockedLevel !== currentLevel){
     const levelNames = {basic: 'Basic', standard: 'Standard', advanced: 'Advanced'};
