@@ -26,11 +26,14 @@ const btnZoomIn=qs("#zoomInBtn"), btnZoomOut=qs("#zoomOutBtn"), btnZoomReset=qs(
 const levelSelector=qs("#levelSelector");
 const eyesContainer=qs("#eyesContainer");
 const bubbleRewards=qs("#bubbleRewards");
-const ballCounter=qs("#ballCounter");
 
-// Audio context for bubbling sound
+// Audio context for sounds
 let audioContext = null;
 let bubblingInterval = null;
+
+// Track active oscillators to prevent distortion
+let activeOscillators = [];
+const MAX_CONCURRENT_SOUNDS = 3;
 
 // Physics engine for bouncing balls
 let balls = [];
@@ -106,11 +109,24 @@ function updateZoom(){
   zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
 }
 
+// Clean up oscillators to prevent distortion
+function cleanupOscillators(){
+  activeOscillators = activeOscillators.filter(osc => {
+    if(osc.stopTime && audioContext.currentTime > osc.stopTime){
+      return false;
+    }
+    return true;
+  });
+}
+
 // Bubbling sound generator
 function playBubbleSound(){
   if(!audioContext){
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
+  
+  cleanupOscillators();
+  if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS) return;
   
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
@@ -121,37 +137,49 @@ function playBubbleSound(){
   oscillator.frequency.value = 300 + Math.random() * 200;
   oscillator.type = 'sine';
   
-  gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+  gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
   
+  const stopTime = audioContext.currentTime + 0.1;
   oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.1);
+  oscillator.stop(stopTime);
+  
+  activeOscillators.push({osc: oscillator, stopTime});
 }
 
 // Boink sound for wall/floor bounce
 function playBoinkSound(velocity){
   if(!audioContext) return;
   
+  cleanupOscillators();
+  if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS) return;
+  
   const osc = audioContext.createOscillator();
   const gain = audioContext.createGain();
   osc.connect(gain);
   gain.connect(audioContext.destination);
   
-  const volume = Math.min(0.15, Math.abs(velocity) * 0.02);
-  const freq = 150 + Math.abs(velocity) * 10;
+  const volume = Math.min(0.08, Math.abs(velocity) * 0.01);
+  const freq = 150 + Math.abs(velocity) * 8;
   
   osc.frequency.value = freq;
   osc.type = 'triangle';
   gain.gain.setValueAtTime(volume, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
   
+  const stopTime = audioContext.currentTime + 0.08;
   osc.start(audioContext.currentTime);
-  osc.stop(audioContext.currentTime + 0.1);
+  osc.stop(stopTime);
+  
+  activeOscillators.push({osc, stopTime});
 }
 
 // Bubble collision sound
 function playBubbleCollisionSound(){
   if(!audioContext) return;
+  
+  cleanupOscillators();
+  if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS) return;
   
   const osc = audioContext.createOscillator();
   const gain = audioContext.createGain();
@@ -160,11 +188,14 @@ function playBubbleCollisionSound(){
   
   osc.frequency.value = 400 + Math.random() * 200;
   osc.type = 'sine';
-  gain.gain.setValueAtTime(0.08, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.04, audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.12);
   
+  const stopTime = audioContext.currentTime + 0.12;
   osc.start(audioContext.currentTime);
-  osc.stop(audioContext.currentTime + 0.15);
+  osc.stop(stopTime);
+  
+  activeOscillators.push({osc, stopTime});
 }
 
 function startBubblingSound(){
@@ -571,10 +602,6 @@ function setEyesThinking(){
 }
 
 // Bubble blob reward system with PHYSICS
-function updateBallCounter(){
-  ballCounter.textContent = `🎈 ${balls.length}`;
-}
-
 function spawnBubbleBlob(){
   console.log('[CSA] Spawning bubble blob...');
   const colors = ['#ff3b30', '#ffb020', '#1e86ff'];
@@ -605,7 +632,6 @@ function spawnBubbleBlob(){
   
   balls.push(ball);
   console.log('[CSA] Ball physics initialized:', ball);
-  updateBallCounter();
   
   // Start physics if not running
   if(!physicsInterval){
@@ -733,7 +759,6 @@ function updatePhysics(){
 function clearAllBalls(){
   balls.forEach(ball => ball.element.remove());
   balls = [];
-  updateBallCounter();
   if(physicsInterval){
     clearInterval(physicsInterval);
     physicsInterval = null;
@@ -850,9 +875,6 @@ btnRestart.addEventListener("click", async ()=>{
   
   // Initialize eyes as happy
   setEyesHappy();
-  
-  // Initialize ball counter
-  updateBallCounter();
   
   await loadScratchblocks();
 
