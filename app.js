@@ -119,6 +119,14 @@ function cleanupOscillators(){
   });
 }
 
+// Initialize audio context (requires user interaction)
+function initAudioContext(){
+  if(!audioContext){
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    console.log('[CSA] Audio context initialized');
+  }
+}
+
 // Bubbling sound generator
 function playBubbleSound(){
   if(!audioContext){
@@ -137,7 +145,7 @@ function playBubbleSound(){
   oscillator.frequency.value = 300 + Math.random() * 200;
   oscillator.type = 'sine';
   
-  gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
+  gainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
   gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
   
   const stopTime = audioContext.currentTime + 0.1;
@@ -159,7 +167,7 @@ function playBoinkSound(velocity){
   osc.connect(gain);
   gain.connect(audioContext.destination);
   
-  const volume = Math.min(0.08, Math.abs(velocity) * 0.01);
+  const volume = Math.min(0.12, Math.abs(velocity) * 0.015);
   const freq = 150 + Math.abs(velocity) * 8;
   
   osc.frequency.value = freq;
@@ -188,7 +196,7 @@ function playBubbleCollisionSound(){
   
   osc.frequency.value = 400 + Math.random() * 200;
   osc.type = 'sine';
-  gain.gain.setValueAtTime(0.04, audioContext.currentTime);
+  gain.gain.setValueAtTime(0.07, audioContext.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.12);
   
   const stopTime = audioContext.currentTime + 0.12;
@@ -577,7 +585,8 @@ function showHint(){
 }
 
 function spike(){ 
-  cortexSpikeUntil=performance.now()+1600; 
+  cortexSpikeUntil=performance.now()+1600;
+  initAudioContext();  // Initialize audio on user interaction
   setEyesThinking();
   startBubblingSound();
   
@@ -621,9 +630,9 @@ function spawnBubbleBlob(){
   const ball = {
     element: blob,
     x: 20,
-    y: bubbleRewards.clientHeight - 40,
+    y: 5,  // Start just above floor
     vx: 15 + Math.random() * 5,  // Fast horizontal velocity
-    vy: -8 - Math.random() * 4,  // Initial upward velocity
+    vy: -10 - Math.random() * 5,  // Strong initial upward kick
     radius: 20,
     color: randomColor,
     mass: 1,
@@ -644,6 +653,7 @@ function updatePhysics(){
   const container = bubbleRewards.getBoundingClientRect();
   const width = container.width - 40;
   const height = container.height - 40;
+  const floor = 0;  // Floor is at bottom (0px from bottom)
   const gravity = 0.5;
   const damping = 0.99;
   
@@ -662,9 +672,9 @@ function updatePhysics(){
     ball.vx *= damping;
     ball.vy *= damping;
     
-    // Floor collision
-    if(ball.y >= height){
-      ball.y = height;
+    // Floor collision - balls sit at bottom
+    if(ball.y <= floor){
+      ball.y = floor;
       ball.vy = -ball.vy * ball.restitution;
       if(Math.abs(ball.vy) > 2){
         playBoinkSound(ball.vy);
@@ -672,8 +682,8 @@ function updatePhysics(){
     }
     
     // Ceiling collision
-    if(ball.y <= 0){
-      ball.y = 0;
+    if(ball.y >= height){
+      ball.y = height;
       ball.vy = -ball.vy * ball.restitution;
       playBoinkSound(ball.vy);
     }
@@ -737,17 +747,17 @@ function updatePhysics(){
     ball.element.style.left = `${ball.x}px`;
     ball.element.style.bottom = `${ball.y}px`;
     
-    // Stop physics if all balls are settled
-    if(Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1 && Math.abs(ball.y - height) < 2){
+    // Stop physics if all balls are settled at floor
+    if(Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1 && ball.y <= 2){
       ball.vx = 0;
       ball.vy = 0;
-      ball.y = height;
+      ball.y = 0;  // Snap to floor
     }
   }
   
   // Stop physics if all balls are at rest
   const allAtRest = balls.every(b => 
-    Math.abs(b.vx) < 0.1 && Math.abs(b.vy) < 0.1 && Math.abs(b.y - height) < 2
+    Math.abs(b.vx) < 0.1 && Math.abs(b.vy) < 0.1 && b.y <= 2
   );
   
   if(allAtRest && balls.length > 0){
