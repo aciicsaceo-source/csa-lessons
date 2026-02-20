@@ -30,6 +30,7 @@ const bubbleRewards=qs("#bubbleRewards");
 // Audio context for sounds
 let audioContext = null;
 let bubblingInterval = null;
+let audioInitialized = false;
 
 // Track active oscillators to prevent distortion
 let activeOscillators = [];
@@ -39,6 +40,14 @@ const MAX_CONCURRENT_SOUNDS = 3;
 let balls = [];
 let physicsInterval = null;
 let levelCompletedThisSession = false;
+
+// Force audio initialization on ANY user interaction
+document.addEventListener('click', ()=>{
+  if(!audioInitialized){
+    initAudioContext();
+    audioInitialized = true;
+  }
+}, {once: true});
 
 let scratchblocksReady = null;
 function setBlocksStatus(msg){
@@ -122,19 +131,60 @@ function cleanupOscillators(){
 // Initialize audio context (requires user interaction)
 function initAudioContext(){
   if(!audioContext){
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    console.log('[CSA] Audio context initialized');
+    try{
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      console.log('[CSA] Audio context initialized, state:', audioContext.state);
+      
+      // Resume if suspended
+      if(audioContext.state === 'suspended'){
+        audioContext.resume().then(()=>{
+          console.log('[CSA] Audio context resumed');
+        });
+      }
+      
+      // Test sound
+      setTimeout(()=>{
+        console.log('[CSA] Playing test sound...');
+        playTestSound();
+      }, 100);
+    }catch(e){
+      console.error('[CSA] Audio context error:', e);
+    }
   }
+}
+
+// Test sound to verify audio is working
+function playTestSound(){
+  if(!audioContext) return;
+  console.log('[CSA] Test sound - context state:', audioContext.state);
+  
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  
+  osc.frequency.value = 440;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+  
+  osc.start(audioContext.currentTime);
+  osc.stop(audioContext.currentTime + 0.2);
+  console.log('[CSA] Test sound played');
 }
 
 // Bubbling sound generator
 function playBubbleSound(){
   if(!audioContext){
+    console.warn('[CSA] playBubbleSound: no audio context');
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
   
   cleanupOscillators();
-  if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS) return;
+  if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS){
+    console.log('[CSA] Max concurrent sounds reached');
+    return;
+  }
   
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
@@ -157,7 +207,12 @@ function playBubbleSound(){
 
 // Boink sound for wall/floor bounce
 function playBoinkSound(velocity){
-  if(!audioContext) return;
+  if(!audioContext){
+    console.warn('[CSA] playBoinkSound: no audio context');
+    return;
+  }
+  
+  console.log('[CSA] BOINK! velocity:', velocity);
   
   cleanupOscillators();
   if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS) return;
@@ -184,7 +239,12 @@ function playBoinkSound(velocity){
 
 // Bubble collision sound
 function playBubbleCollisionSound(){
-  if(!audioContext) return;
+  if(!audioContext){
+    console.warn('[CSA] playBubbleCollisionSound: no audio context');
+    return;
+  }
+  
+  console.log('[CSA] Bubble collision!');
   
   cleanupOscillators();
   if(activeOscillators.length >= MAX_CONCURRENT_SOUNDS) return;
